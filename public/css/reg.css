@@ -1,0 +1,146 @@
+/* styles.css */
+
+body {
+    background-color: #f0f0f0; /* Light gray background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+.signup-image {
+    width: 210px;
+}
+.container {
+    display: flex;
+    width: 600px; /* Reduced width */
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.left-section {
+    background-color: #FFB524; /* Orange background */
+    padding: 20px; /* Reduced padding */
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+}
+
+.left-section h2 {
+    margin: 0 0 10px 0; /* Reduced margin */
+    font-size: 18px; /* Reduced font size */
+}
+
+.left-section p {
+    margin: 0 0 10px 0; /* Reduced margin */
+    font-size: 12px; /* Reduced font size */
+}
+
+.left-section img {
+    width: 80px; /* Reduced image size */
+    border-radius: 50%;
+}
+
+.right-section {
+    padding: 20px; /* Reduced padding */
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.form-group {
+    margin-bottom: 10px; /* Reduced margin */
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px; /* Reduced padding */
+    border: 2px solid #81C408; /* Green border */
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 14px; /* Reduced font size */
+}
+
+.form-group input:focus {
+    border-color: #FFB524; /* Orange border on focus */
+    outline: none;
+}
+
+.form-group button {
+    width: 100%;
+    padding: 10px;
+    background-color: #81C408; /* Green button */
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 14px; /* Reduced font size */
+    cursor: pointer;
+}
+
+.form-group button:hover {
+    background-color: #6ea207; /* Darker green on hover */
+}
+
+.form-group p {
+    font-size: 10px;
+    color: gray;
+}
+
+.or {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 12px;
+    color: gray;
+}
+
+.sso-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sso-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 12px; /* Reduced font size */
+    cursor: pointer;
+}
+
+.sso-button img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.sso-button.google {
+    background-color: white;
+}
+
+.sso-button.facebook {
+    background-color: #3b5998;
+    color: white;
+}
+
+.existing-user {
+    margin-top: 10px; /* Reduced margin */
+    font-size: 12px;
+    color: gray;
+    text-align: center;
+}
+
+.existing-user a {
+    color: #FFB524; /* Orange text */
+    text-decoration: none;
+}

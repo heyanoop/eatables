@@ -1,0 +1,123 @@
+<%- include('../Layouts/header.ejs') %>
+
+<!-- Single Page Header start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">Wishlist</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">Pages</a></li>
+        <li class="breadcrumb-item active text-white">Wishlist</li>
+    </ol>
+</div>
+
+<section>
+    <!-- Wishlist Page Start -->
+    <div class="container-fluid py-5">
+        <div class="container py-5">
+            <div class="table-responsive">
+                <% if (locals.wishlist) { %>
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Products</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Add to cart</th>
+                        <th scope="col">Remove</th>
+                      </tr>
+                    </thead>
+                    <% for (let i = 0; i < wishlist.length; i++) { %>
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <div class="d-flex align-items-center">
+                                    <img src="/uploads/<%=wishlist[i].image[0] %>" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt="">
+                                </div>
+                            </th>
+                            <td>
+                                <p class="mb-0 mt-4"> <%= wishlist[i].title %> </p>
+                            </td>
+                            <td>
+                                <p class="mb-0 mt-4">₹ <%=wishlist[i].salesPrice %> /kg</p>
+                            </td>
+                            <td>
+                                <div class="input-group quantity mt-4" style="width: 100px;">
+                                  <button onclick="moveToCart('<%= wishlist[i]._id %>')" class="btn border border-secondary rounded-pill px-3 text-primary">
+                                    <i class="fa fa-shopping-bag me-2 text-primary"></i> Move to cart
+                                  </button>
+                                </div>
+                            </td>
+                            <td>
+                                <button onclick="removeFromWishlist('<%= wishlist[i]._id %>')" class="btn btn-md rounded-circle bg-light border mt-4">
+                                    <i class="fa fa-times text-danger"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <% } %>
+                </table>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    <!-- Wishlist Page End -->
+</section>
+
+<!-- Single Page Header End -->
+
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Include Toastr CSS and JS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script>
+    function removeFromWishlist(productId) {
+        fetch(`/wishlist/remove/${productId}`, {
+            method: 'DELETE',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'Product removed from wishlist') {
+                toastr.success('Product removed from wishlist');
+                setTimeout(() => {
+                location.reload(); // Reload the page to reflect changes
+            }, 750);
+            } else {
+                toastr.error('Failed to remove product from wishlist');
+            }
+            
+        })
+        .catch(error => {
+            toastr.error('Error: ' + error.message);
+            console.error('Error:', error);
+        });
+    }
+
+    function moveToCart(productId) {
+        fetch(`/wishlist/movetocart/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId, quantity: 1 }) // Adjust the quantity as needed
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                toastr.success('Product moved to cart successfully');
+                setTimeout(() => {
+                location.reload(); // Reload the page to reflect changes
+            }, 750);
+            } else {
+                toastr.error(data.message ||'Failed to move product to cart');
+            }
+        })
+        .catch(error => {
+            toastr.error('Error: ' + error.message);
+            console.error('Error:', error);
+        });
+    }
+</script>
+
+<%- include('../Layouts/footer.ejs') %>

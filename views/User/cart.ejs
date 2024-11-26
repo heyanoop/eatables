@@ -1,0 +1,385 @@
+
+
+<%- include('../Layouts/header.ejs') %>
+
+<style>
+    .coupon-popup {
+    width: 100%;
+    max-width: 300px;
+    border: 1px solid #ddd;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    top: 100%;
+    left: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.coupon-popup ul {
+    margin: 0;
+    padding: 0;
+}
+.coupon-popup li {
+    padding: 8px;
+    cursor: pointer;
+}
+.coupon-popup li:hover {
+    background: #f0f0f0;
+}
+
+</style>
+
+
+<!-- Single Page Header start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">Cart</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">Pages</a></li>
+        <li class="breadcrumb-item active text-white">Cart</li>
+    </ol>
+</div>
+<!-- Single Page Header End -->
+
+
+<!-- Cart Page Start -->
+<div class="container-fluid py-5">
+    <div class="container py-5">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">Products</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Remove</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <% myCart.product.forEach(item => { %>
+                      
+                    <tr>
+                      
+                        <th scope="row">
+                            <div class="d-flex align-items-center">
+                                <img src="/uploads/<%= item.productId.image[0] %>" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt="">
+                            </div>
+                        </th>
+                        <td>
+                            <p class="mb-0 mt-4"><%= item.productId.title %></p></p>
+                        </td>
+                        <td>
+                            <p class="mb-0 mt-4">₹ <%= item.productId.salesPrice %> /kg </p>
+                        </td>
+                        <td>
+                            <div class="input-group quantity mt-4" style="width: 100px;">
+                                <div class="input-group-btn">
+                                    <button class="btn btn-sm btn-minus rounded-circle bg-light border" data-product-id="<%= item.productId._id %>" >
+                                    <i class="fa fa-minus"></i>
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control form-control-sm text-center border-0" value="<%= item.quantity %>" readonly>
+                                <div class="input-group-btn">
+                                    <button class="btn btn-sm btn-plus rounded-circle bg-light border" data-product-id="<%= item.productId._id %>">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <p class="mb-0 mt-4"  data-product-id="<%= item.productId._id %>"  data-unit-price="<%= item.productId.salesPrice %>">₹<%= (item.productId.salesPrice * item.quantity).toFixed(2) %> </p>
+                        </td>
+                        <td>
+                           
+                            <button class="btn btn-md rounded-circle bg-light border mt-4"  onclick="removeFromCart('<%= item.productId._id %>')" >
+                                <i class="fa fa-times text-danger"></i>
+                            </button>
+                           
+                        </td>
+                      
+                    
+                    </tr>
+                   
+                    <% }); %>
+                      
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-5">
+            <input type="text" id="couponInput" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
+            <button id="applyCouponButton" class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
+        
+            <!-- Coupon Popup -->
+             
+            <div id="couponPopup" class="coupon-popup position-absolute bg-white border rounded shadow" style="display: none; z-index: 1000;">
+
+                <ul id="couponList" class="list-unstyled m-0 p-3">
+                    <% coupons.forEach(coupon => { %>
+                    <li data-code="<%= coupon.code %>" data-discount="<%= coupon.discount %>" data-expiration-date="<%= coupon.expirationDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>">
+                        <%= coupon.code %>: <%= coupon.discount %>% Off on all products, Valid till: <%= coupon.expirationDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                    </li>
+                    <% }) %>
+                </ul>
+            </div>
+
+        </div>
+        <div class="row g-4 justify-content-end">
+            <div class="col-8"></div>
+            <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
+                <div class="bg-light rounded">
+                    <div class="p-4">
+                        <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
+                        <div class="d-flex justify-content-between mb-4">
+                            <h5 class="mb-0 me-4">Subtotal:</h5>
+                            <p id="subtotal" class="mb-0">₹ <%= myCart.product.reduce((total, item) => total + item.productId.salesPrice * item.quantity, 0).toFixed(2) %></p>
+                        </div>
+                        <div class="d-flex justify-content-between mb-4">
+                            <h5 class="mb-0 me-4">Discount:</h5>
+                            <p id="discount" class="mb-0">₹0.00</p>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <h5 class="mb-0 me-4">Delivery Charges:</h5>
+                            <div class="">
+                                <p id="shipping" class="mb-0">Charges: ₹ <%= myCart.product.reduce((total, item) => total + item.productId.salesPrice * item.quantity, 0) > 400 ? '00.00' : '45.00' %></p>
+                            </div>
+                        </div>
+                        <p class="mb-0 text-end" id="deliveryMessage">(Free delivery above ₹ 400)</p>
+                    </div>
+                    <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
+                        <h5 class="mb-0 ps-4 me-4">Total</h5>
+                        <p id="total" class="mb-0 pe-4">
+                            ₹<%= (myCart.product.reduce((total, item) => total + item.productId.salesPrice * item.quantity, 0) + (myCart.product.reduce((total, item) => total + item.productId.salesPrice * item.quantity, 0) > 400 ? 0 : 45)).toFixed(2) %>
+                        </p>
+                    </div>
+                    <button id="proceedToCheckoutButton" class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button" >Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+        </div>
+        <!-- Cart Page End -->
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const couponData = Array.from(document.querySelectorAll('#couponList li')).map(li => ({
+                code: li.getAttribute('data-code'),
+                discount: parseFloat(li.getAttribute('data-discount')),
+                expirationDate: li.getAttribute('data-expiration-date')
+            }));
+        
+            function showCouponPopup() {
+                const popup = document.getElementById('couponPopup');
+                const couponList = document.getElementById('couponList');
+        
+                // Clear previous list
+                couponList.innerHTML = '';
+        
+                // Populate coupon list
+                couponData.forEach(coupon => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${coupon.code}: ${coupon.discount}% Off, Valid till: ${coupon.expirationDate}`;
+                    listItem.setAttribute('data-code', coupon.code);
+                    listItem.setAttribute('data-discount', coupon.discount);
+                    listItem.setAttribute('data-expiration-date', coupon.expirationDate);
+                    listItem.onclick = () => {
+                        document.getElementById('couponInput').value = coupon.code;
+                        popup.style.display = 'none'; // Hide the popup after selecting a coupon
+                    };
+                    couponList.appendChild(listItem);
+                });
+        
+                // Position and show the popup
+                const input = document.getElementById('couponInput');
+                const rect = input.getBoundingClientRect();
+                popup.style.top = `${rect.bottom + window.scrollY}px`;
+                popup.style.left = `${rect.left + window.scrollX}px`;
+                popup.style.display = 'block';
+            }
+        
+            // Show popup when input is focused
+            const couponInput = document.getElementById('couponInput');
+            if (couponInput) {
+             couponInput.addEventListener('focus', showCouponPopup);
+               }        
+            // Hide popup when clicking outside of it
+            document.addEventListener('click', (event) => {
+                const popup = document.getElementById('couponPopup');
+                const input = document.getElementById('couponInput');
+                if (!popup.contains(event.target) && event.target !== input) {
+                    popup.style.display = 'none';
+                }
+            });
+        
+            // Apply coupon
+            document.getElementById('applyCouponButton').addEventListener('click', () => {
+                const couponCode = document.getElementById('couponInput').value.trim();
+                if (couponCode) {
+                    fetch(`/mycart/applycoupon`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ couponCode })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update the discount and total
+                            const discountElement = document.getElementById('discount');
+                            const totalElement = document.getElementById('total');
+                            const subtotalElement = document.getElementById('subtotal');
+                            const shippingElement = document.getElementById('shipping');
+        
+                            const subtotal = parseFloat(subtotalElement.textContent.replace('₹', ''));
+                            const discount = parseFloat(data.discountAmount);
+                            const shipping = subtotal > 400 ? 0 : 45;
+
+                            discountElement.textContent = `₹ ${discount.toFixed(2)}`;
+                            totalElement.textContent = `₹ ${(subtotal + shipping - discount).toFixed(2)}`;
+                            toastr.success(data.message)
+                            
+                        } else {
+                            toastr.error(data.message);
+                        }
+                    })
+                    .catch(error => {
+                     console.error('Error:', error);
+                     toastr.error('Failed to apply coupon. Please try again.');
+                       });
+                } else {
+                    toastr.error('Please enter a valid coupon code.');
+                }
+            });
+
+
+             // Event listener for proceed to checkout button
+        const proceedToCheckoutButton = document.getElementById('proceedToCheckoutButton');
+        if (proceedToCheckoutButton) {
+            proceedToCheckoutButton.addEventListener('click', () => {
+                const couponCode = couponInput.value.trim();
+                if (couponCode) {
+                    // Redirect to checkout page with couponCode query parameter
+                    window.location.href = `/checkout?couponCode=${couponCode}`;
+                } else {
+                    // If no coupon code applied, normal redirect to checkout page
+                    window.location.href = '/checkout';
+                }
+            });
+        }
+        });
+
+        
+        </script>
+        
+    
+
+
+
+
+
+<script>
+
+
+const removePCart= document.getElementById('remove');
+
+    function removeFromCart(productId) {
+      fetch(`/mycart`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          toastr.success(data.message)
+          setTimeout(() => {
+                location.reload(); // Reload the page to reflect changes
+            }, 750);
+        } else {
+          toastr.error(data.message);
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+
+    //incriment 
+
+    document.addEventListener('DOMContentLoaded', () => {
+document.querySelectorAll('.btn-plus').forEach(button => {
+button.addEventListener('click', () => {
+const productId = button.getAttribute('data-product-id');
+updateCartQuantity(productId, 'increment');
+});
+});
+
+//decrement
+
+document.querySelectorAll('.btn-minus').forEach(button => {
+button.addEventListener('click', () => {
+const productId = button.getAttribute('data-product-id');
+updateCartQuantity(productId, 'decrement');
+});
+});
+});
+
+//function to update 
+
+function updateCartQuantity(productId, action) {
+fetch(`/mycart/update`, {
+method: 'PATCH',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify({ productId, action })
+})
+.then(response => response.json())
+.then(data => {
+if (data.success) {
+// Update quantity input value if needed
+const quantityInput = document.querySelector(`input[data-product-id="${productId}"]`);
+if (quantityInput) {
+quantityInput.value = data.newQuantity;
+}
+
+// Update total price
+const totalPriceElement = document.querySelector(`p[data-product-id="${productId}"]`);
+if (totalPriceElement) {
+const unitPrice = parseFloat(totalPriceElement.getAttribute('data-unit-price'));
+const newTotalPrice = (unitPrice * data.newQuantity).toFixed(2);
+totalPriceElement.textContent = `₹${newTotalPrice}`;
+}
+// Update subtotal and total
+updateSubtotalAndTotal();
+
+} else {
+toastr.error(data.message); // Or handle error in a way suitable for your UI
+}
+})
+.catch(error => console.error('Error:', error));
+}
+
+  function updateSubtotalAndTotal() {
+        const subtotalElement = document.getElementById('subtotal');
+        const shippingElement = document.getElementById('shipping');
+        const totalElement = document.getElementById('total');
+        let subtotal = 0;
+
+        document.querySelectorAll('p[data-unit-price]').forEach(totalPriceElement => {
+            const unitPrice = parseFloat(totalPriceElement.getAttribute('data-unit-price'));
+            const quantity = parseInt(totalPriceElement.closest('tr').querySelector('input').value, 10);
+            subtotal += unitPrice * quantity;
+        });
+
+        subtotalElement.textContent = `₹${subtotal.toFixed(2)}`;
+
+        let shipping = subtotal > 400 ? 0.00 : 45.00;
+        shippingElement.textContent = `Charges:₹${shipping.toFixed(2)}`;
+        
+        totalElement.textContent = `₹ ${(subtotal + shipping).toFixed(2)}`;
+    }
+</script>
+
+
+<%- include('../Layouts/footer.ejs') %>

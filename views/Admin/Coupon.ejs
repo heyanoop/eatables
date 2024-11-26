@@ -1,0 +1,275 @@
+
+<%- include('../Layouts/adminHeader.ejs') %>
+
+
+
+<div class="container-fluid py-4">
+    <!-- Coupon List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card my-4">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                        <h6 class="text-white text-capitalize ps-3" style="font-size: 1.25rem; font-weight: bold;">Coupon List</h6>
+                    </div>
+                </div>
+                <div class="card-body px-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table table-hover text-center">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Sl No</th>
+                                    <th scope="col">Coupon Code</th>
+                                    <th scope="col">Discount</th>
+                                    <th scope="col">Expiration Date</th>
+                                    <th scope="col">Usage Limit</th>
+                                    <!-- <th scope="col">Usage Count</th> -->
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="couponList">
+                                
+                                
+                                    <% if (coupons.length > 0) { %>
+                                      <% coupons.forEach((coupon, index) => { %>
+                                        <tr>
+                                          <td><%= index + 1 %></td>
+                                          <td><%= coupon.code %></td>
+                                          <td><%= coupon.discount %>%</td>
+                                          <td><%= new Date(coupon.expirationDate).toLocaleDateString() %></td>
+                                          <td><%= coupon.usageLimit %></td>
+                                          <!-- <td><%= coupon.usageCount %></td> -->
+                                          <td><%= coupon.isActive ? 'Active' : 'Inactive' %></td>
+                                          <td>
+                                            <% if (coupon.isActive) { %>
+                                                <button class="btn btn-danger btn-sm" onclick="toggleCouponStatus('<%= coupon._id %>', false)">Block</button>
+                                              <% } else { %>
+                                                <button class="btn btn-success btn-sm" onclick="toggleCouponStatus('<%= coupon._id %>', true)">Unblock</button>
+                                              <% } %>
+                                          </td>
+                                        </tr>
+                                      <% }) %>
+                                    <% } else { %>
+                                      <tr>
+                                        <td colspan="8">No coupons found</td>
+                                      </tr>
+                                    <% } %>
+                                  
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+ <!-- Coupon Creation Form -->
+ <div class="row">
+  <div class="col-12">
+      <div class="card my-4">
+          <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+              <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                  <h6 class="text-white text-capitalize ps-3" style="font-size: 1.25rem; font-weight: bold;">Create Coupon</h6>
+              </div>
+          </div>
+          <div class="card-body">
+              <div class="row justify-content-center">
+                  <div class="col-md-10">
+                      <form method="POST" id="couponForm">
+                          <div class="row">
+                              <div class="col-md-6 mb-4">
+                                  <label for="coupon_code" class="form-label" style="font-weight: bold; font-size: 1rem;">Coupon Code</label>
+                                  <input type="text" placeholder="Type here" class="form-control" id="coupon_code" name="code" required />
+                                  <div id="codeError" class="text-danger"></div>
+                              </div>
+                              <div class="col-md-6 mb-4">
+                                  <label for="discount" class="form-label" style="font-weight: bold; font-size: 1rem;">Discount Percentage</label>
+                                  <input type="number" placeholder="Type here" class="form-control" id="discount" name="discount" required />
+                                  <div id="discountError" class="text-danger"></div>
+                              </div>
+                          </div>
+                          <div class="row">
+                              <div class="col-md-6 mb-4">
+                                  <label for="expiration_date" class="form-label" style="font-weight: bold; font-size: 1rem;">Expiration Date</label>
+                                  <input type="date" class="form-control" id="expiration_date" name="expirationDate" required />
+                                  <div id="expirationDateError" class="text-danger"></div>
+                              </div>
+                              <div class="col-md-6 mb-4">
+                                  <label for="usage_limit" class="form-label" style="font-weight: bold; font-size: 1rem;">Usage Limit</label>
+                                  <input type="number" placeholder="Type here" class="form-control" id="usage_limit" name="usageLimit" required />
+                                  <div id="usageLimitError" class="text-danger"></div>
+                              </div>
+                          </div>
+                          <div class="d-grid">
+                              <button class="btn btn-primary btn-sm" type="submit">Add Coupon</button>
+                          </div>
+                      </form>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Form validation
+function validateForm() {
+    let isValid = true;
+
+    // Coupon Code Validation
+    const couponCode = document.getElementById('coupon_code').value.trim();
+    const codeError = document.getElementById('codeError');
+    if (couponCode.length < 3 || couponCode.length > 15 || couponCode === "") {
+        codeError.textContent = 'Coupon Code must be between 3 and 15 characters and cannot be empty.';
+        isValid = false;
+    } else {
+        codeError.textContent = '';
+    }
+
+    // Discount Validation
+    const discount = document.getElementById('discount').value;
+    const discountError = document.getElementById('discountError');
+    if (discount <= 0 || discount > 100) {
+        discountError.textContent = 'Discount must be between 1 and 100.';
+        isValid = false;
+    } else {
+        discountError.textContent = '';
+    }
+
+    // Expiration Date Validation
+    const expirationDate = document.getElementById('expiration_date').value;
+    const expirationDateError = document.getElementById('expirationDateError');
+    if (!expirationDate) {
+        expirationDateError.textContent = 'Expiration Date is required.';
+        isValid = false;
+    } else {
+        expirationDateError.textContent = '';
+    }
+
+    // Usage Limit Validation
+    const usageLimit = document.getElementById('usage_limit').value;
+    const usageLimitError = document.getElementById('usageLimitError');
+    if (usageLimit <= 0) {
+        usageLimitError.textContent = 'Usage Limit must be greater than 0.';
+        isValid = false;
+    } else {
+        usageLimitError.textContent = '';
+    }
+
+    return isValid;
+}
+
+document.getElementById('couponForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    if (!validateForm()) {
+        return;
+    }
+
+    const formData = new FormData(this);
+
+    const data = {
+        code: formData.get('code'),
+        discount: formData.get('discount'),
+        expirationDate: formData.get('expirationDate'),
+        usageLimit: formData.get('usageLimit'),
+    };
+
+    console.log('Data to send:', data); 
+
+    try {
+        const response = await fetch('/admin/createCoupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            Swal.fire({
+                title: 'Success!',
+                text: result.message,
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.reload(); 
+            });
+        } else {
+            const error = await response.json();
+            Swal.fire({
+                title: 'Error!',
+                text: error.message,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    } catch (err) {
+        console.error('Error:', err);
+        Swal.fire({
+            title: 'Error!',
+            text: 'An unexpected error occurred.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    }
+});
+
+
+async function toggleCouponStatus(couponId, isActive) {
+  const action = isActive ? 'unblock' : 'block';
+  const confirmation = await Swal.fire({
+    title: `Are you sure you want to ${action} this coupon?`,
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: `Yes, ${action} it!`,
+    cancelButtonText: 'Cancel'
+  });
+
+  if (confirmation.isConfirmed) {
+    try {
+      const response = await fetch(`/admin/coupon/${couponId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive })
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      // Display success message
+      Swal.fire(
+        'Success!',
+        `Coupon has been ${action}ed.`,
+        'success'
+      ).then(() => {
+        location.reload(); // Refresh the page after success
+      });
+    } catch (error) {
+      console.error('Error toggling coupon status:', error);
+
+      Swal.fire(
+        'Error!',
+        'There was an issue with the request.',
+        'error'
+      );
+    }
+  }
+}
+
+
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+<%- include('../Layouts/adminFooter.ejs') %>

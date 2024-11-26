@@ -1,0 +1,364 @@
+
+
+<%- include('../Layouts/adminHeader.ejs') %>
+
+
+<div class="container-fluid py-4">
+  <div class="row">
+      <div class="col-12">
+          <div class="card my-4">
+              <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                  <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                      <h6 class="text-white text-capitalize ps-3" style="font-size: 1.25rem; font-weight: bold;">Offer List</h6>
+                  </div>
+              </div>
+
+              <div class="card-body px-0 pb-2">
+                  <div class="table-responsive p-0">
+                      <table class="table table-hover text-center"> <!-- Added text-center class -->
+                          <thead>
+                              <tr>
+                                  <th scope="col">Sl No</th>
+                                  <th scope="col">Offer Name</th>
+                                  <th scope="col">Valid From</th>
+                                  <th scope="col">Valid Till</th>
+                                  <th scope="col">Offer Type</th>
+                                  <th scope="col">Discount</th>
+                                  <th scope="col">Status</th>
+                                  <th scope="col">Actions</th>
+                              </tr>
+                          </thead>
+
+                          <% function formatIndianDate(dateString) { %>
+                            <% const date = new Date(dateString); %>
+                            <% const day = ('0' + date.getDate()).slice(-2); %>
+                            <% const month = ('0' + (date.getMonth() + 1)).slice(-2); %>
+                            <% const year = date.getFullYear(); %>
+                            <% return `${day}/${month}/${year}`; %>
+                          <% } %>
+                          <tbody id="offerList">
+                            <% if (offer.length > 0) { %>
+                              <% offer.forEach((offer, index) => { %>
+                                <tr>
+                                  <td><%= index + 1 %></td>
+                                  <td><%= offer.offerName %></td>
+                                  <td><%= formatIndianDate(offer.validFrom) %></td>
+                                  <td><%= formatIndianDate(offer.validUntil) %></td>
+                                  <td>
+                                    <% if (offer.offerType === 'category' && offer.category) { %>
+                                      <%= offer.category.name %>
+                                    <% } else if (offer.offerType === 'product' && offer.product) { %>
+                                      <%= offer.product.title %>
+                                    <% } else { %>
+                                      No Category/Product
+                                    <% } %>
+                                  </td>
+                                  <td><%= offer.discount %></td>
+                                  <td><%= offer.isActive ? 'Active' : 'Not Active' %></td>
+                                  <td>
+                                    
+                                    <div class="d-flex justify-content-center">
+                                      <% if (offer.isActive) { %>
+                                        <button class="btn btn-danger btn-sm" onclick="toggleCouponStatus('<%= offer._id %>', false)">Block</button>
+                                      <% } else { %>
+                                        <button class="btn btn-success btn-sm" onclick="toggleCouponStatus('<%= offer._id %>', true)">Unblock</button>
+                                      <% } %>
+                                    </div>
+                                  </td>
+                                </tr>
+                              <% }) %>
+                            <% } else { %>
+                              <tr>
+                                <td colspan="8">No offers found</td>
+                              </tr>
+                            <% } %>
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<style>
+  .table {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .table th, .table td {
+    text-align: center; /* Center-aligns the text in table headers and cells */
+  }
+</style>
+
+
+
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card my-4">
+        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+          <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+            <h6 class="text-white text-capitalize ps-3" style="font-size: 1.25rem; font-weight: bold;">Create Offer</h6>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row justify-content-center">
+            <div class="col-md-10">
+              <form method="POST" onsubmit="return validateForm(event)">
+                <div class="row">
+                  <div class="col-md-6 mb-4">
+                    <label for="offer_name" class="form-label" style="font-weight: bold; font-size: 1rem;">Offer Name</label>
+                    <input type="text" placeholder="Type here" class="form-control" id="offer_name" name="offerName" required />
+                    <div id="nameError" class="text-danger"></div>
+                  </div>
+                  <div class="col-md-6 mb-4">
+                    <label for="discount" class="form-label" style="font-weight: bold; font-size: 1rem;">Discount Percentage</label>
+                    <input type="number" placeholder="Type here" class="form-control" id="discount" name="discount" required />
+                    <div id="discountError" class="text-danger"></div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-4">
+                    <label for="valid_from" class="form-label" style="font-weight: bold; font-size: 1rem;">Valid From</label>
+                    <input type="date" class="form-control" id="valid_from" name="validFrom" required />
+                    <div id="validFromError" class="text-danger"></div>
+                  </div>
+                  <div class="col-md-6 mb-4">
+                    <label for="valid_until" class="form-label" style="font-weight: bold; font-size: 1rem;">Valid Until</label>
+                    <input type="date" class="form-control" id="valid_until" name="validUntil" required />
+                    <div id="validUntilError" class="text-danger"></div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-4">
+                    <label for="offer_type" class="form-label" style="font-weight: bold; font-size: 1rem;">Offer Type</label>
+                    <select class="form-select" id="offer_type" name="offerType" required>
+                      <option value="" disabled selected>Select offer type</option>
+                      <option value="category">Category-based</option>
+                      <option value="product">Product-based</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-4" id="category-select" style="display: none;">
+                    <label for="category" class="form-label" style="font-weight: bold; font-size: 1rem;">Select Category</label>
+                    <select class="form-select" id="category" name="category">
+                      <% categories.forEach(category => { %>
+                        <option value="<%= category._id %>"><%= category.name %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-4" id="product-select" style="display: none;">
+                    <label for="product" class="form-label" style="font-weight: bold; font-size: 1rem;">Select Product</label>
+                    <select class="form-select" id="product" name="product">
+                      <% products.forEach(product => { %>
+                        <option value="<%= product._id %>"><%= product.title %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+                </div>
+                <div class="d-grid">
+                  <button class="btn btn-primary btn-sm" type="submit">Add Offer</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .form-control, .form-select, textarea {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .form-control::placeholder, .form-select::placeholder {
+    color: #999;
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+
+
+  document.getElementById('offer_type').addEventListener('change', function() {
+    const categorySelect = document.getElementById('category-select');
+    const productSelect = document.getElementById('product-select');
+    if (this.value === 'category') {
+      categorySelect.style.display = 'block';
+      productSelect.style.display = 'none';
+    } else if (this.value === 'product') {
+      categorySelect.style.display = 'none';
+      productSelect.style.display = 'block';
+    } else {
+      categorySelect.style.display = 'none';
+      productSelect.style.display = 'none';
+    }
+  })
+
+  // form validation 
+
+  function validateForm(event) {
+    let isValid = true;
+
+    
+    // Offer Name Validation
+    const offerName = document.getElementById('offer_name').value.trim();
+    const nameError = document.getElementById('nameError');
+    if (offerName.length < 3 || offerName.length > 15 || offerName === "") {
+      nameError.textContent = 'Offer Name must be between 3 and 15 characters and cannot be empty.';
+      isValid = false;
+    } else {
+      nameError.textContent = '';
+    }
+
+    // Discount Validation
+    const discount = document.getElementById('discount').value;
+    const discountError = document.getElementById('discountError');
+    if (discount <= 0 || discount > 100) {
+      discountError.textContent = 'Discount must be between 1 and 100.';
+      isValid = false;
+    } else {
+      discountError.textContent = '';
+    }
+
+    // Date Validation
+    const validFrom = document.getElementById('valid_from').value;
+    const validUntil = document.getElementById('valid_until').value;
+    const validFromError = document.getElementById('validFromError');
+    const validUntilError = document.getElementById('validUntilError');
+    
+    if (new Date(validFrom) >= new Date(validUntil)) {
+      validFromError.textContent = 'Valid From date must be before Valid Until date.';
+      validUntilError.textContent = 'Valid Until date must be after Valid From date.';
+      isValid = false;
+    } else {
+      validFromError.textContent = '';
+      validUntilError.textContent = '';
+    }
+
+    return isValid;
+  }
+
+  document.querySelector('form').addEventListener('submit', async function(event) {
+
+    if (!validateForm(event)) {
+
+      event.preventDefault();
+       
+      return;
+    }
+
+    event.preventDefault(); 
+
+    const formData = new FormData(this);
+
+    const data = {
+      offerName: formData.get('offerName'),
+      discount: formData.get('discount'),
+      validFrom: formData.get('validFrom'),
+      validUntil: formData.get('validUntil'),
+      offerType: formData.get('offerType'),
+      category: formData.get('category') || null,
+      product: formData.get('product') || null,
+    };
+
+    console.log('Data to send:', data); 
+
+    try {
+      const response = await fetch('/admin/addOffer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        Swal.fire({
+          title: 'Success!',
+          text: result.message,
+          icon: 'success',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          window.location.reload(); 
+        });
+      } else {
+        const error = await response.json();
+        Swal.fire({
+          title: 'Error!',
+          text: error.message,
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      Swal.fire({
+        title: 'Error!',
+        text: 'An unexpected error occurred.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  });
+
+
+  async function toggleCouponStatus(couponId, isActive) {
+  const action = isActive ? 'unblock' : 'block';
+  const confirmation = await Swal.fire({
+    title: `Are you sure you want to ${action} this offer?`,
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: `Yes, ${action} it!`,
+    cancelButtonText: 'Cancel'
+  });
+
+  if (confirmation.isConfirmed) {
+    try {
+      const response = await fetch(`/admin/offer/${couponId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive })
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      // Display success message
+      Swal.fire(
+        'Success!',
+        `Coupon has been ${action}ed.`,
+        'success'
+      ).then(() => {
+        location.reload(); // Refresh the page after success
+      });
+    } catch (error) {
+      console.error('Error toggling coupon status:', error);
+
+      Swal.fire(
+        'Error!',
+        'There was an issue with the request.',
+        'error'
+      );
+    }
+  }
+}
+
+</script>
+
+
+<%- include('../Layouts/adminFooter.ejs') %>

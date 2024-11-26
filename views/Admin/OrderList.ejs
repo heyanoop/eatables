@@ -1,0 +1,311 @@
+
+<%- include('../Layouts/adminHeader.ejs') %>
+
+<style>
+    .badge {
+        display: inline-block;
+        padding: 0.35em 0.65em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.375rem;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+   
+    .status-dropdown {
+        width: 120px; /* Adjust width as needed */
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .status-select {
+    width: 100px;
+    height: 30px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: white;
+    color: black;
+}
+
+.status-select.pending {
+    background-color: rgb(255, 162, 0);
+    color: white;
+}
+
+.status-select.shipped {
+    background-color: blue;
+    color: white;
+}
+
+.status-select.delivered {
+    background-color: green;
+    color: white;
+}
+
+.status-select.cancelled {
+    background-color: red;
+    color: white;
+}
+
+.status-select.returned {
+    background-color: orange;
+    color: black;
+}
+
+.status-pending {
+    background-color: rgb(255, 162, 0); /* Pending: orange */
+    color: white;
+    padding: 0.35em 0.65em;
+    border-radius: 0.375rem;
+}
+
+.status-shipped {
+    background-color: blue; /* Shipped: blue */
+    color: white;
+    padding: 0.35em 0.65em;
+    border-radius: 0.375rem;
+}
+
+.status-delivered {
+    background-color: green; /* Delivered: green */
+    color: white;
+    padding: 0.35em 0.65em;
+    border-radius: 0.375rem;
+}
+
+.status-cancelled {
+    background-color: red; /* Cancelled: red */
+    color: white;
+    padding: 0.35em 0.65em;
+    border-radius: 0.375rem;
+}
+
+.status-returned {
+    background-color: orange; /* Returned: orange */
+    color: black;
+    padding: 0.35em 0.65em;
+    border-radius: 0.375rem;
+}
+
+
+
+</style>
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card my-4">
+        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+          <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+            <h6 class="text-white text-capitalize ps-3">Order Details</h6>
+          </div>
+        </div>
+        <div class="card-body px-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table align-items-center mb-0" id="myTable">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary" style="font-weight: 900; opacity: 1; font-size: 10px;">Order Id</th>
+                  <th class="text-uppercase text-secondary" style="font-weight: 900; opacity: 1; font-size: 10px;">Customer Name</th>
+                  <th class="text-center text-uppercase text-secondary" style="font-weight: 900; opacity: 1; font-size: 10px;">Payment type</th>
+                  <th class="text-center text-uppercase text-secondary" style="font-weight: 900; opacity: 1; font-size: 10px;">Total</th>
+                  <th class="text-center text-uppercase text-secondary" style="font-weight: 900; opacity: 1; font-size: 10px;">Date</th>
+                  <th class="text-center text-uppercase text-secondary" style="font-weight: 900; opacity: 1; font-size: 10px;">Payment Status</th>
+                  <th class="text-center text-uppercase text-secondary" style="font-weight: 900; opacity: 1; font-size: 10px;">Order Status</th>
+                  <th class="text-center text-uppercase text-secondary" style="font-weight: 900; opacity: 1; font-size: 10px;">Change Status</th>
+                  <th class="text-secondary opacity-7"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% orders.forEach(order => { %>  
+                  <tr class="order-item">
+                    <td class="align-middle text-center text-sm">
+                      <span class="text-secondary text-xs font-weight-bold"><%= order.orderId %></span>
+                    </td>
+                    <td class="align-middle text-center">
+                      <span class="text-secondary text-xs font-weight-bold"><%= order.deliveryAddress.name %></span>
+                    </td>
+                    <td class="align-middle text-center">
+                      <span class="text-secondary text-xs font-weight-bold"><%= order.paymentMethod %></span>
+                    </td>
+                    <td class="align-middle text-center">
+                      <span class="text-secondary text-xs font-weight-bold"><%= order.totalAmount %></span>
+                    </td>
+                    <td class="align-middle text-center">
+                      <span class="text-secondary text-xs font-weight-bold"> 
+                         <%= new Date(order.createdAt).toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: 'numeric',
+                          minute: 'numeric',
+                          hour12: true 
+                         }) %>
+                      </span>
+                    </td>
+                    <td class="align-middle text-center">
+                      <% if (order.paymentMethod === "Cash On Delivery" && order.orderStatus === "Delivered") { %>
+                        <span class="badge badge-sm bg-gradient-success">Paid</span>
+                      <% } else { %>
+                        <span class="badge badge-sm bg-gradient-success"><%= order.paymentStatus %></span>
+                      <% } %>
+                    </td>
+                    <td class="align-middle text-center">
+                      <span class="badge badge-sm bg-gradient-success" id="orderStatus_<%= order._id %>"><%= order.orderStatus %></span>
+                    </td>
+                    <td class="align-middle text-center">
+                      <% if (order.orderStatus === 'Delivered' || order.orderStatus === 'Cancelled') { %>
+                          <span class="status-static status-<%= order.orderStatus.toLowerCase() %>"><%= order.orderStatus %></span>
+                      <% } else { %>
+                          <select class="status-select <%= order.orderStatus.toLowerCase() %>" data-order-id="<%= order._id %>">
+                              <option value="Pending" <%= order.orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
+                              <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                              <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                              <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                              <option value="Returned" <%= order.orderStatus === 'Returned' ? 'selected' : '' %>>Returned</option>
+                          </select>
+                      <% } %>
+                  </td>
+                  </tr>
+                <% }); %> 
+              </tbody>
+            </table>
+            <!-- Pagination Container -->
+           <div class="pagination-container">
+           <ul id="pagination" class="pagination"></ul>
+           </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- jQuery Toast Plugin -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.css" /> -->
+<!-- Toastr CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+<!-- Toastr JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+<script>
+  $(document).ready(function() {
+    var itemsPerPage = 8; // Number of items per page
+
+    // Function to display items for a given page number
+    function showPage(pageNum) {
+      $('.order-item').hide(); // Hide all order items
+      var startIndex = (pageNum - 1) * itemsPerPage;
+      var endIndex = startIndex + itemsPerPage - 1;
+      $('.order-item').slice(startIndex, endIndex + 1).show(); // Show items for the current page
+
+      // Update active state in pagination
+      $('#pagination').find('li.page-item').removeClass('active');
+      $('#pagination').find('li.page-item[data-page="' + pageNum + '"]').addClass('active');
+    }
+
+    // Generate pagination links based on number of items
+    function generatePagination() {
+      var numPages = Math.ceil($('.order-item').length / itemsPerPage);
+      var paginationHTML = '';
+      for (var i = 1; i <= numPages; i++) {
+        paginationHTML += '<li class="page-item" data-page="' + i + '"><a class="page-link" href="#">' + i + '</a></li>';
+      }
+      $('#pagination').html(paginationHTML);
+      $('#pagination').find('li.page-item:first').addClass('active'); // Set first page as active initially
+    }
+
+    // Initial setup
+    generatePagination(); // Generate pagination links
+    showPage(1); // Show first page of items
+
+    // Pagination click handler
+    $('#pagination').on('click', 'li.page-item', function(e) {
+      e.preventDefault(); // Prevent default anchor behavior
+      var pageNum = $(this).data('page');
+      showPage(pageNum); // Show the selected page
+    });
+  });
+</script>
+
+<style>
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+  }
+
+  .pagination .page-item {
+    margin: 0 5px;
+  }
+
+  .pagination .page-link {
+    color: #81c408; /* Link color */
+    text-decoration: none;
+  }
+
+  .pagination .page-item.active .page-link {
+    background-color: #d63384; /* Active page background color */
+    color: white; /* Active page text color */
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const statusSelectElements = document.querySelectorAll('.status-select');
+  
+      statusSelectElements.forEach(selectElement => {
+          selectElement.addEventListener('change', async function() {
+              const orderId = this.getAttribute('data-order-id');
+              const newStatus = this.value;
+  
+              try {
+                  const response = await fetch(`/admin/orders/change-status/${orderId}`, {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({ newStatus })
+                  });
+  
+                  if (response.ok) {
+                      const result = await response.json();
+                      toastr.success(result.message);
+                  } else {
+                      const errorText = await response.text();
+                      toastr.error(`Error: ${errorText}`);
+                  }
+              } catch (error) {
+                  toastr.error('An error occurred while updating the status.');
+                  console.error('Error:', error);
+              }
+          });
+      });
+  });
+  </script>
+  
+
+
+
+<!------------------------------------------------------------------------------------------------------------------------------------------------->
+
+<%- include('../Layouts/adminFooter.ejs') %>

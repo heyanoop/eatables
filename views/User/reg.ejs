@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Form</title>
+    <link rel="stylesheet" href="/css/reg.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+
+     body {
+            background-image: url('/img/fresh-mixed-vegetables-wooden-box.jpg'); /* Replace with your image path */
+            background-size: cover; /* Ensures the image covers the entire viewport */
+            background-position: center; /* Centers the image */
+            background-repeat: no-repeat; /* Prevents repeating the image */
+            margin: 0; /* Removes default margin */
+            height: 100vh; /* Ensures the body takes full height */
+        }
+        /* Add your styles here */
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding-right: 40px; /* Adjust based on the size of the icon */
+        }
+
+        .input-group .fa-eye, .input-group .fa-eye-slash {
+            position: absolute;
+            right: 10px; /* Adjust to position the icon properly */
+            cursor: pointer;
+        }
+
+        #message {
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 10px; /* Position the toast in the top-right corner */
+            right: 10px;
+            background: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 1000;
+            min-width: 200px; /* Ensure toast is wide enough */
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #4CAF50; /* Green */
+        }
+
+        .toast.error {
+            background: #F44336; /* Red */
+        }
+    </style>
+</head>
+<body>
+
+   
+    <div class="container">
+        <div class="left-section">
+            <h2>Looks like you're new here!</h2>
+            <p>Sign up with your mobile number to get started</p>
+            <img src="/img/logo.png" alt="Organic Vegetables" class="signup-image">
+        </div>
+        <div class="right-section">
+            <form id="signupForm">
+                <div class="form-group">
+                    <input type="text" id="firstName" name="firstName" placeholder="Enter first name" required pattern="[A-Za-z ]+" title="Only letters and spaces are allowed">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="lastName" name="lastName" placeholder="Enter last name" required pattern="[A-Za-z ]+" title="Only letters and spaces are allowed">
+                </div>
+                <div class="form-group">
+                    <input type="email" id="email" name="email" placeholder="Enter email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Invalid email address">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="mobile" name="mobile" placeholder="Enter mobile number" required pattern="[0-9]{10}" title="Mobile number must be 10 digits">
+                </div>
+                <div class="form-group password-container">
+                    <div class="input-group">
+                        <input type="password" id="password" name="password" placeholder="Enter password" minlength="8" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]+$" title="Password must contain at least 8 characters with at least one uppercase letter, one lowercase letter, one number, and one special character">
+                        <i class="fa fa-eye" id="eye" onclick="togglePassword('password', 'eye')"></i>
+                    </div>
+                </div>
+                <div class="form-group password-container">
+                    <div class="input-group">
+                        <input type="password" id="password_conf" name="password_conf" placeholder="Re-Enter password" minlength="8" required title="Passwords must match">
+                        <i class="fa fa-eye" id="eye_conf" onclick="togglePassword('password_conf', 'eye_conf')"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <p>By continuing, you agree to Eatable's Terms of Use and Privacy Policy.</p>
+                    <button type="submit">Continue</button>
+                </div>
+            </form>
+            <p class="existing-user">Existing User? <a href="/login">Login in</a></p>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script>
+        function togglePassword(passwordId, eyeId) {
+            var password = document.getElementById(passwordId);
+            var eye = document.getElementById(eyeId);
+            if (password.type === "password") {
+                password.type = "text";
+                eye.className = "fa fa-eye-slash";
+            } else {
+                password.type = "password";
+                eye.className = "fa fa-eye";
+            }
+        }
+
+        async function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type} show`;
+            toast.textContent = message;
+
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                
+                setTimeout(() => {
+                    toastContainer.removeChild(toast);
+                }, 500); // Match the duration of the transition
+            }, 2000); // Show the toast for 2 seconds
+        }
+
+        document.getElementById('signupForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast(result.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = result.redirectUrl;
+                    }, 2000); // Redirect after showing toast for 2 seconds
+                } else {
+                    showToast(result.message || 'Error occurred. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error during registration:', error);
+                showToast('Error occurred. Please try again.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
+

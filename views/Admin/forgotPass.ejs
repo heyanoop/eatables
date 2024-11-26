@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/css/login.css">
+
+
+    <style>
+        :root {
+            --bs-primary: #81C408;
+            --bs-secondary: #FFB524;
+        }
+
+        /* Add styles for the modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #forgotPasswordForm,
+        #verifyOtpForm,
+        #resetPasswordForm {
+            display: flex;
+            flex-direction: column;
+        }
+        #forgotPasswordForm .form-group,
+        #verifyOtpForm .form-group,
+        #resetPasswordForm .form-group {
+            margin-bottom: 15px;
+        }
+        #requestOtpButton,
+        #verifyOtpButton,
+        #resendButton,
+        #resetPasswordButton {
+            background-color: var(--bs-primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #requestOtpButton:hover,
+        #verifyOtpButton:hover,
+        #resendButton:hover,
+        #resetPasswordButton:hover {
+            background-color: var(--bs-secondary);
+        }
+        .timer-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* Toaster styles */
+        .toaster {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 200px;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            z-index: 1000;
+        }
+        .toaster.show {
+            opacity: 1;
+        }
+        .toaster.success {
+            background-color: #4CAF50;
+        }
+        .toaster.error {
+            background-color: #f44336;
+        }
+
+        :root {
+    --bs-primary: #81C408;
+    --bs-secondary: #FFB524;
+}
+
+.password-container {
+    position: relative;
+    width: 100%;
+    max-width: 320px; /* Adjust as needed */
+}
+
+#password {
+    width: 100%; /* Adjust width to fill the container */
+    padding: 10px;
+    padding-right: 40px; /* Space for the eye icon */
+    box-sizing: border-box;
+    border: 2px solid var(--bs-primary); /* Default border color */
+    border-radius: 4px; /* Optional: rounded corners */
+    transition: border-color 0.3s ease; /* Smooth transition for border color */
+}
+
+#password:focus {
+    border-color: var(--bs-secondary); /* Border color on focus */
+    outline: none; /* Remove default outline */
+}
+
+#eye {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    font-size: 20px; /* Adjust icon size */
+    color: #000; /* Icon color */
+    cursor: pointer;
+    z-index: 1; /* Ensure the icon is above the input field */
+}
+.background-image {
+    position: relative; /* Ensure the pseudo-element is positioned correctly */
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Optional: centers content vertically */
+    align-items: center; /* Optional: centers content horizontally */
+    overflow: hidden; /* Prevents overflow of the pseudo-element */
+}
+
+.background-image::before {
+    content: ""; /* Required to create the pseudo-element */
+    position: absolute; /* Position it absolutely within the .background-image container */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/img/fresh-mixed-vegetables-wooden-box.jpg'); /* Path to your image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.9; /* Adjust opacity here (0.0 to 1.0) */
+    z-index: -1; /* Place it behind the content */
+}
+.container {
+            display: flex;
+            justify-content: space-between;
+            margin-left: -20px; /* Adjust the value as needed */
+            /* Other existing styles */
+        }
+        .left-section, .right-section {
+            flex: 1;
+            padding: 20px;
+        }
+        .login-image {
+            max-width: 100%;
+            height: auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .input-group {
+            position: relative;
+        }
+        .input-group .fa-eye {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+        .sso-button {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+        .sso-button img {
+            max-width: 20px;
+            margin-right: 10px;
+        }
+        .toaster {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 200px;
+    padding: 10px;
+    background-color: #333;
+    color: #fff;
+    border-radius: 5px;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1000;
+}
+.toaster.show {
+    opacity: 1;
+}
+.toaster.success {
+    background-color: #4CAF50;
+}
+.toaster.error {
+    background-color: #f44336;
+}
+
+
+    </style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
+</head>
+<body>
+  <div class="background-image">
+    <div class="container">
+        <div class="left-section">
+            <h2>Login</h2>
+            <p>Get access to your Orders, Wishlist and Recommendations</p>
+            <img src="/img/logo.png" alt="Organic Vegetables" class="login-image">
+        </div>
+        <div class="right-section">
+            <form id="loginForm" action="/login" method="post">
+                <div class="form-group">
+                    <br>
+                    <input type="email" name="email" placeholder="Enter email" required>
+                </div>
+                <br>
+                
+                <div class="password-container">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input type="password" id="password" name="password" placeholder="Enter password" required>
+                            <i class="fa fa-eye" id="eye" onclick="togglePassword()"></i>
+                        </div>
+                    </div>
+                </div>
+                
+            
+                 
+                <br>
+                <div class="form-group">
+                    <button type="submit">Login</button>
+                </div>
+                
+                <div class="form-group">
+                    <a href="#" class="forgot-password" id="forgotPasswordLink">Forgot Password?</a>
+                </div>
+
+                <p class="or">or</p>
+
+                <div class="sso-buttons">
+                    <button class="sso-button google" onclick="window.location.href='/login/google'">
+                        <img src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png" alt="Google"> LogIn with Google
+                    </button>
+                </div>
+            </form>
+            <p class="new-account">New to Eatable? <a href="/register">Create an account</a></p>
+        </div>
+    </div>
+ </div>
+
+
+    <script>
+        function togglePassword() {
+          var password = document.getElementById("password");
+          var eye = document.getElementById("eye");
+          if (password.type === "password") {
+            password.type = "text";
+            eye.className = "fa fa-eye-slash";
+          } else {
+            password.type = "password";
+            eye.className = "fa fa-eye";
+          }
+        }
+      </script>
+      
+      
+    
+
+    <!-- Modal for Forgot Password -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <form id="forgotPasswordForm">
+                <div class="form-group">
+                    <input type="email" name="email" id="forgotEmail" placeholder="Enter your email" required>
+                </div>
+                <button type="button" id="requestOtpButton">Request OTP</button>
+            </form>
+
+            <form id="verifyOtpForm" style="display:none;">
+                <div class="form-group">
+                    <label for="otp">Enter OTP</label>
+                    <input type="text" name="otp" id="otp" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <button type="button" id="verifyOtpButton" class="verify-otp">VERIFY OTP</button>
+                </div>
+                <div class="form-group">
+                    <button type="button" id="resendButton" class="resend-otp" disabled>RESEND OTP</button>
+                </div>
+                <div class="timer-container">
+                    <p>Resend OTP in <span id="timer">35</span> seconds</p>
+                </div>
+            </form>
+
+            <form id="resetPasswordForm" style="display:none;">
+                <h1>Reset your Password</h1>
+                <div class="form-group">
+                    <input type="password" name="newPassword" id="newPassword" placeholder="Enter new password" required>
+                    <span toggle="#newPassword" class="eye-toggle toggle-password"></span>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm new password" required>
+                    <span toggle="#confirmPassword" class="eye-toggle toggle-password"></span>
+                </div>
+                <button type="button" id="resetPasswordButton">Reset Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toaster notifications -->
+    <div id="toaster" class="toaster"></div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        document.getElementById('loginForm').onsubmit = function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    const email = document.querySelector('input[name="email"]').value;
+    const password = document.querySelector('input[name="password"]').value;
+
+    fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+    })
+    .then(response => {
+        // Check if response is JSON
+        const contentType = response.headers.get('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json();
+        } else {
+            return response.text().then(text => {
+                throw new Error('Unexpected response format');
+            });
+        }
+    })
+    .then(data => {
+        if (data.message) {
+            // Display toast message for login failure
+            toastr.error(data.message);
+        } else if (data.redirect) {
+            // Redirect on successful login
+            window.location.href = data.redirect;
+        } else {
+            // Handle any unexpected response format
+            toastr.error('Unexpected response from server.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        toastr.error('An error occurred during login.');
+    });
+};
+    </script>
+        
+    
+
+    <script>
+        // Get modal element
+        const modal = document.getElementById('forgotPasswordModal');
+        const closeModal = document.getElementById('closeModal');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const requestOtpButton = document.getElementById('requestOtpButton');
+        const verifyOtpButton = document.getElementById('verifyOtpButton');
+        const resetPasswordButton = document.getElementById('resetPasswordButton');
+        const resendButton = document.getElementById('resendButton');
+        const timerElement = document.getElementById('timer');
+        const toaster = document.getElementById('toaster');
+        let timerValue = 35;
+        let timerInterval;
+
+        // Show modal when clicking "Forgot Password?"
+        forgotPasswordLink.onclick = function() {
+            modal.style.display = 'block';
+        }
+
+        // Close modal when clicking the "x"
+        closeModal.onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside of the modal
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Toaster function
+        const showToast = (message, type = 'success') => {
+            toaster.textContent = message;
+            toaster.className = `toaster ${type} show`;
+            setTimeout(() => {
+                toaster.className = 'toaster';
+            }, 3000);
+        };
+
+        // Request OTP
+        requestOtpButton.onclick = function() {
+            const email = document.getElementById('forgotEmail').value;
+            fetch('/request-password-reset-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('OTP sent to your email.', 'success');
+                    document.getElementById('forgotPasswordForm').style.display = 'none';
+                    document.getElementById('verifyOtpForm').style.display = 'block';
+                    startTimer();
+                } else {
+                    showToast('Error sending OTP.', 'error');
+                }
+            });
+        }
+
+        // Start timer for resend OTP button
+        const startTimer = () => {
+            resendButton.disabled = true;
+            timerElement.textContent = timerValue;
+
+            timerInterval = setInterval(() => {
+                timerValue--;
+                timerElement.textContent = timerValue;
+
+                if (timerValue <= 0) {
+                    clearInterval(timerInterval);
+                    resendButton.disabled = false;
+                    timerElement.textContent = '';
+                }
+            }, 1000);
+        };
+
+        // Resend OTP
+        resendButton.addEventListener('click', () => {
+            fetch('/request-password-resend-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({}) // You can add any additional data if needed
+            })
+            .then(response => {
+                if (response.ok) {
+                    showToast('OTP resent successfully!', 'success');
+                    timerValue = 35;
+                    startTimer();
+                } else {
+                    showToast('Error resending OTP.', 'error');
+                }
+            });
+        });
+
+        // Verify OTP
+ document.getElementById('verifyOtpButton').onclick = function() {
+    const otp = document.getElementById('otp').value;
+
+    fetch('/verify-password-reset-otp', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ otp })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('OTP verified successfully.', 'success');
+            document.getElementById('verifyOtpForm').style.display = 'none';
+            document.getElementById('resetPasswordForm').style.display = 'block';
+        } else {
+            showToast('Invalid OTP.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error verifying OTP.', 'error');
+    });
+};
+
+// Toggle password visibility
+document.querySelectorAll('.toggle-password').forEach(function(icon) {
+    icon.addEventListener('click', function() {
+        const passwordField = document.querySelector(this.getAttribute('toggle'));
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+        this.classList.toggle('active');
+    });
+});
+
+// Reset Password
+document.getElementById('resetPasswordButton').onclick = function() {
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (newPassword !== confirmPassword) {
+        showToast('Passwords do not match.', 'error');
+        return;
+    }
+
+    fetch('/reset-password', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newPassword })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Password reset successful.', 'success');
+
+            setTimeout(() => {
+                    window.location.href = '/home';
+                }, 2000)
+            
+        } else {
+            showToast(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error resetting password.', 'error');
+    });
+};
+
+</script>
+</body>
+</html>

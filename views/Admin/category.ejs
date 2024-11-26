@@ -1,0 +1,224 @@
+
+
+    <%- include('../Layouts/adminHeader.ejs') %>
+    <!-- End Navbar -->
+
+
+  
+    <div class="container-fluid py-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+              <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                <h6 class="text-white text-capitalize ps-3" style="font-size: 1.25rem; font-weight: bold;">Category List</h6>
+              </div>
+            </div>
+            <div class="card-body px-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th scope="col">sl no</th>
+                      <th scope="col">Category</th>
+                      <th scope="col">Description</th>
+                      <th scope="col">Date Created</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (locals.categoryDetail) { %>
+                      <% for (let i = 0; i < categoryDetail.length; i++) { %>
+                        <tr>
+                          <th scope="row"><%= i + 1 %></th>
+                          <td><%= categoryDetail[i].name %></td>
+                          <td><%= categoryDetail[i].description %></td>
+                          <td><%= new Date().toLocaleString() %></td>
+                          <td>
+                            <div class="col-lg-2 col-sm-2 col-4 col-status">
+                              <% if (categoryDetail[i].isActive) { %>
+                                <span class="badge rounded-pill alert-success">Active</span>
+                              <% } else { %>
+                                <span class="badge rounded-pill alert-danger">Blocked</span>
+                              <% } %>
+                            </div>
+                          </td>
+                          <td>
+                            <% if (categoryDetail[i].isActive == true) { %>
+
+                              <button class="btn btn-sm btn-danger" onclick="confirmSubmission('<%= categoryDetail[i]._id %>', true)">
+                                Block
+                              </button>
+                            <% } else { %>
+                              <button class="btn btn-sm btn-danger" onclick="confirmSubmission('<%= categoryDetail[i]._id %>', false)">
+                                Unblock
+                              </button>
+                            <% } %>
+                            
+                            <button class="btn btn-sm btn-warning" onclick="window.location.href='/admin/editCategories?id=<%= categoryDetail[i]._id %>'">
+                              Edit
+                            </button>
+                          </td>
+                        </tr>
+                      <% } %>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> 
+
+    <div class="container-fluid py-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+              <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                <h6 class="text-white text-capitalize ps-3" style="font-size: 1.25rem; font-weight: bold;">Create Categories</h6>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row justify-content-center">
+                <div class="col-md-8">
+                  <form action= "/admin/addCategory"  method="POST"  onsubmit="return validateForm(event) ">
+                    <div class="mb-4">
+                      <label for="product_name" class="form-label" style="font-weight: bold; font-size: 1rem;">Category Name</label>
+                      <input type="text" placeholder="Type here" class="form-control" id="product_name" name="categoryName" required/>
+                      <div id="nameError" class="text-danger"></div>
+                    </div>
+                    <div class="mb-4">
+                      <label class="form-label" style="font-weight: bold; font-size: 1rem;">Description</label>
+                      <textarea placeholder="Type here" class="form-control" name="categoryDescription" required></textarea>
+                      <div id="descriptionError" class="text-danger"></div>
+                    </div>
+                    <div class="d-grid">
+                      <button class="btn btn-primary btn-sm" type="submit">Add Categories</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!----------------------------------------------------------------------------------------------------------------------------------->     
+ <!-- Scripts -->
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ <script>
+   function confirmSubmission(catId, isActive) {
+     const actionText = isActive ? 'Block' : 'Unblock';
+     const confirmationText = isActive ? 'Are you sure to Block this Category?' : 'Are you sure to Unblock this Category?';
+
+     Swal.fire({
+       title: 'Are you sure?',
+       text: confirmationText,
+       icon: 'warning',
+       showCancelButton: true,
+       confirmButtonText: 'Confirm',
+       confirmButtonColor: 'orange',
+       cancelButtonText: 'Cancel'
+     }).then((result) => {
+       if (result.isConfirmed) {
+         const url = isActive ? `/admin/blockCategory?id=${catId}` : `/admin/unBlockCategory?id=${catId}`;
+         window.location.href = url;
+       }
+     });
+   }
+ </script>
+
+ 
+ <!------------------------------------------------------>
+
+              <!-- Form section -->
+  
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- JavaScript validation -->
+  <script>
+    async function validateForm(event) {
+      event.preventDefault();
+
+      const nameInput = document.getElementById('product_name');
+      const descriptionInput = document.querySelector('textarea[name="categoryDescription"]');
+      const nameError = document.getElementById('nameError');
+      const descriptionError = document.getElementById('descriptionError');
+
+      // Clear previous error messages
+      nameError.textContent = '';
+      descriptionError.textContent = '';
+
+      if (!nameInput.value.trim()) {
+        nameError.textContent = 'Category name is required.';
+        return false;
+      }
+
+      if (/\d/.test(nameInput.value)) {
+        nameError.textContent = 'Category name should not contain numbers.';
+        return false;
+      }
+
+      if (/\s/.test(nameInput.value)) {
+        nameError.textContent = 'Category name should not contain spaces.';
+        return false;
+      }
+
+      if (!descriptionInput.value.trim()) {
+        descriptionError.textContent = 'Description is required.';
+        return false;
+      } 
+
+      try {
+        // Check if the category name already exists
+        const response = await fetch('/admin/addCategory', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            categoryName: nameInput.value.trim(),
+            categoryDescription: descriptionInput.value.trim()
+          })
+        });
+        
+        const data = await response.json();
+        if (data.error) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: data.error,
+            timer: 1500
+          });
+          return false;
+        } else {
+          // Handle success (category doesn't exist)
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Category added successfully!',
+            timer: 1500
+          });
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+          return true;
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Something went wrong. Please try again.',
+          timer: 1500
+        });
+        return false;
+      }
+    }
+  </script>
+  
+<%- include('../Layouts/adminFooter.ejs') %>

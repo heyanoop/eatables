@@ -1,0 +1,269 @@
+<%- include('../Layouts/adminHeader.ejs') %>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+
+<style>
+  .form-control::placeholder {
+      color: #6c757d;
+      font-weight: bold;
+  }
+
+  .form-control {
+      font-weight: bold;
+      border: 2px solid #ced4da;
+      border-radius: 4px;
+      padding: 10px;
+  }
+
+  .card-header h4 {
+      font-weight: bold;
+  }
+
+  .form-label {
+      font-weight: bold;
+  }
+
+  .btn-publish {
+      background-color: green;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-top: 20px;
+  }
+
+  .delete-icon {
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: red;
+  }
+</style>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card my-4">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                        <h6 class="text-white text-capitalize ps-3">Add New Product</h6>
+                    </div>
+                </div>
+                
+                <section class="content-main">
+                    <div class="row">
+                        <div class="col-lg-9">
+                            <div class="content-header">
+                                <form id="uploadForm" onsubmit="return validateForm(event)">
+                                    <div class="row">
+                                        <!-- Basic Info -->
+                                        <div class="col-lg-6">
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <h4>Basic</h4>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="mb-4">
+                                                        <label for="product_name" class="form-label">Product title</label>
+                                                        <input type="text" placeholder="Product Name" class="form-control" id="product_name" name="pname" pattern="^[a-zA-Z0-9\s.,'-]+$" required>
+                                                    </div>
+                                                    <div class="mb-4">
+                                                        <label class="form-label">Full description</label>
+                                                        <textarea placeholder="Product Description" class="form-control" rows="4" name="pdescription" required></textarea>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-lg-6">
+                                                            <div class="mb-4">
+                                                                <label class="form-label">MRP</label>
+                                                                <input placeholder="₹" type="number" class="form-control" name="regularPrice" min="0" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <div class="mb-4">
+                                                                <label class="form-label">Quantity</label>
+                                                                <input type="number" placeholder="Quantity" class="form-control" name="quantity" min="0" required>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Category -->
+                                                    <div class="mb-4">
+                                                        <label class="form-label">Category</label>
+                                                        <select class="form-select" name="pcategory">
+                                                            <!-- Assuming categories are dynamically populated from the server -->
+                                                            <% if (locals.newcategory) { %>
+                                                                <% for (let i = 0; i < newcategory.length; i++) { %>
+                                                                    <option value="<%= newcategory[i]._id %>"> <%= newcategory[i].name %> </option>
+                                                                <% } %>
+                                                            <% } %>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Images -->
+                                        <div class="col-lg-6">
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <h4>Images</h4>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="input-upload">
+                                                        <input class="form-control" id="fileInput" type="file" name="images" accept="image/*" multiple onchange="validateFileInput()">
+                                                        <span id="fileError" style="color: red; display: none;">Please select only image files.</span>
+                                                    </div>
+                                                    <div class="preview-container mt-3" id="previewContainer">
+                                                        <div id="cropperContainer" style="display: none;">
+                                                            <img id="image" src="" alt="Image for cropping" style="max-width: 100%;">
+                                                            <div class="crop-buttons mt-2">
+                                                                <button id="cropButton" class="btn btn-primary btn-sm" type="button">Crop Image</button>
+                                                                <button id="cancelButton" class="btn btn-secondary btn-sm" type="button">Cancel</button>
+                                                            </div>
+                                                        </div>
+                                                        <div id="croppedImagesContainer" class="row">
+                                                            <!-- Dynamically added cropped images will appear here -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Publish Button -->
+                                    <div style="text-align: right;">
+                                        <button class="btn btn-md rounded font-sm hover-up" type="submit" style="background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer; margin-bottom: 30px;">Publish</button>
+                                    </div>
+                                    <!-- Hidden input field for cropped images -->
+                                    <input type="hidden" id="croppedImagesData" name="croppedImagesData">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Cropper.js and jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    let cropper;
+    let croppedImagesData = $('#croppedImagesData');
+
+    function validateFileInput() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        const previewContainer = document.getElementById('cropperContainer');
+        
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('image').src = e.target.result;
+                previewContainer.style.display = 'block';
+                cropper = new Cropper(document.getElementById('image'), {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    minCropBoxWidth: 500,
+                    minCropBoxHeight: 500,
+                });
+            };
+            reader.readAsDataURL(file);
+        } else {
+            document.getElementById('fileError').style.display = 'block';
+            fileInput.value = ''; // Reset the input
+        }
+    }
+
+    document.getElementById('cropButton').addEventListener('click', function() {
+        const canvas = cropper.getCroppedCanvas({
+            width: 500,
+            height: 500,
+        });
+
+        const croppedImage = canvas.toBlob(blob => {
+            addCroppedImage(blob);
+        }, 'image/jpeg');
+
+        document.getElementById('cropperContainer').style.display = 'none';
+        cropper.destroy();
+    });
+
+    document.getElementById('cancelButton').addEventListener('click', function() {
+        document.getElementById('cropperContainer').style.display = 'none';
+        cropper.destroy();
+    });
+
+    function addCroppedImage(blob) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(blob);
+        img.classList.add('img-thumbnail', 'col-lg-4', 'mb-2');
+        
+        const container = document.getElementById('croppedImagesContainer');
+        container.appendChild(img);
+
+        let existingData = croppedImagesData.val();
+        existingData = existingData ? existingData.split(',') : [];
+        existingData.push(URL.createObjectURL(blob));
+        croppedImagesData.val(existingData.join(','));
+
+        // Append blob to the FormData
+        const formData = new FormData();
+        formData.append('croppedImage', blob, 'croppedImage.jpg');
+        
+        // Store FormData in a hidden field to submit with the form
+        document.getElementById('formDataField').value = JSON.stringify([...formData.entries()]);
+    }
+
+    function validateForm(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const croppedImages = croppedImagesData.val().split(',').filter(Boolean);
+        if (croppedImages.length === 0) {
+            alert('Please crop at least one image.');
+            return false;
+        }
+
+        const formData = new FormData(document.getElementById('uploadForm'));
+
+        // Append the cropped images data to the FormData object
+        croppedImages.forEach((imageData, index) => {
+            const blob = dataURLtoBlob(imageData);
+            formData.append(`croppedImage-${index + 1}`, blob, `croppedImage-${index + 1}.jpg`);
+        });
+
+        console.log("formData", formData );
+        console.log("cropped img", croppedImages );
+
+        // Send the formData to the backend using fetch
+        fetch('/admin/addProducts', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            // Redirect or take other appropriate action on success
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+        return false; // Prevent the form from submitting normally
+    }
+
+    function dataURLtoBlob(dataURL) {
+        const [header, base64] = dataURL.split(',');
+        const mimeString = header.split(':')[1].split(';')[0];
+        const byteString = atob(base64);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        return new Blob([ab], { type: mimeString });
+    }
+</script>
+
+<%- include('../Layouts/adminFooter.ejs') %>

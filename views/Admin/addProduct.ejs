@@ -1,0 +1,142 @@
+<%- include('../Layouts/adminHeader.ejs') %>
+
+
+<div class="container-fluid py-4">
+    <div class="row">
+      <div class="col-12">
+        <div class="card my-4">
+          <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+            <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+              <h6 class="text-white text-capitalize ps-3">Add New Product</h6>
+            </div>
+          </div>
+
+<section class="content-main">
+    <div class="row">
+        <div class="col-9">
+            <div class="content-header">
+               
+              <form action="/admin/addProducts" method="post" enctype="multipart/form-data" id="uploadForm" onsubmit="return validateForm()">
+                   
+                    
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Basic</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label for="product_name" class="form-label">Product title</label>
+                        <input type="text" placeholder="Product Name" class="form-control" id="product_name" name="pname" pattern="^[a-zA-Z0-9\s.,'-]*$" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Full description</label>
+                        <textarea placeholder="Product Description" class="form-control" rows="4" name="pdescription" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="mb-4">
+                                <label class="form-label">MRP</label>
+                                <input placeholder="₹" type="number" class="form-control" name="regularPrice" min="0" required>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="mb-4">
+                                <label class="form-label">Quantity</label>
+                                <input type="number" placeholder="Quantity" class="form-control" name="quantity" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Images</h4>
+                </div>
+                <div class="card-body">
+                    <div class="input-upload">
+                        <input class="form-control" id="fileInput" type="file" name="image" accept="image/*" multiple onchange="validateFileInput()">
+                        <span id="fileError" style="color: red; display: none;">Please select only image files.</span>
+                    </div>
+                    <div class="preview-container mt-3" id="previewContainer"></div>
+                </div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Category & Brand</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6 mb-3">
+                            <label class="form-label">Category</label>
+                            <select class="form-select" name="pcategory">
+                              <option value="">Select one</option> 
+                                <%if(locals.newcategory){%>
+                                    <%=console.log('hai')%>
+                                    <%for( let i=0; i < newcategory.length; i++){%>
+                                        <option value="<%=newcategory[i]._id%>"> <%=newcategory[i].name%> </option>
+                                    <%}%>
+                                <%}%>
+                            </select>
+                        </div>
+
+                        <div style="text-align: right;">
+                          <button class="btn btn-md rounded font-sm hover-up" type="submit" style="background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer; margin-bottom: 30px;">Publish</button>
+                      </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        
+        </div>
+      </section>
+      </div>   
+    </div>
+</section>  
+
+<script>
+  function validateForm() {
+      // Validate negative values for price and quantity
+      const price = document.querySelector('input[name="regularPrice"]').value;
+      const quantity = document.querySelector('input[name="quantity"]').value;
+      if (price < 0 || quantity < 0) {
+          alert('Price and quantity must be non-negative.');
+          return false;
+      }
+  
+      // Validate image file types
+      const fileInput = document.getElementById('fileInput');
+      const fileError = document.getElementById('fileError');
+      const files = fileInput.files;
+      for (let i = 0; i < files.length; i++) {
+          if (!files[i].type.startsWith('image/')) {
+              fileError.style.display = 'block';
+              return false;
+          } else {
+              fileError.style.display = 'none';
+          }
+      }
+  
+      return true;
+  }
+  
+  function validateFileInput() {
+      const fileInput = document.getElementById('fileInput');
+      const fileError = document.getElementById('fileError');
+      const files = fileInput.files;
+      for (let i = 0; i < files.length; i++) {
+          if (!files[i].type.startsWith('image/')) {
+              fileError.style.display = 'block';
+              return false;
+          } else {
+              fileError.style.display = 'none';
+          }
+      }
+      return true;
+  }
+  </script>
+<%- include('../Layouts/adminFooter.ejs') %>

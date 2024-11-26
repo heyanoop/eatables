@@ -1,0 +1,469 @@
+<%- include('../Layouts/header.ejs') %>
+
+<div class="container page-header py-5">
+    <h1 class="text-center text-white display-6">Checkout</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">Cart</a></li>
+        <li class="breadcrumb-item active text-white">Checkout</li>
+    </ol>
+</div>
+<!-- Single Page Header End -->
+
+<!-- Checkout Page Start -->
+<div class="container py-5">
+    <h1 class="mb-4">Billing details</h1>
+
+    <!-- Add New Address Modal -->
+    <div class="modal fade" id="addAddressModal" tabindex="-1" role="dialog" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addAddressModalLabel">Add New Address</h5>
+                    <button type="button" class="close" aria-label="Close" data-dismiss="modal" style="border-radius: 50%;background-color: orange; border-color: orange;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAddressForm" >
+                        <div id="validationAlerts" class="alert alert-danger" style="display: none;"></div>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control"id="addname" name="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="house">House/Flat</label>
+                            <input type="text" class="form-control" id="addressLine1" name="house">
+                        </div>
+                        <div class="form-group">
+                            <label for="street">Land Mark</label>
+                            <input type="text" class="form-control" id="addressLine2" name="street">
+                        </div>
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" class="form-control" id="city" name="city">
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <input type="text" class="form-control" id="state" name="state">
+                        </div>
+                        <div class="form-group">
+                            <label for="pincode">Pincode</label>
+                            <input type="text" class="form-control" id="postalCode" name="pincode">
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile">Mobile Number</label>
+                            <input type="text" class="form-control" id="contact" name="mobile">
+                        </div>
+                        
+                        <br>
+                        <button type="submit" class="btn btn-primary">Save Address</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- modal end -->
+
+    <div class="row g-5">
+        <div class="col-md-12 col-lg-5 col-xl-5">
+            <div id="addressInsert" style="flex-wrap:wrap;height: fit-content">
+                <!-- Address insertion here -->
+                <% userAddress.forEach((address, index) => { %>
+                    <div class="card mb-3">
+                        <div class="row g-0">
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= address.name %></h5>
+                                    <p class="card-text"><%= address.addressLine1 %>, <%= address.addressLine2 %></p>
+                                    <p class="card-text"><%= address.city %>, <%= address.state %> - <%= address.postalCode %></p>
+                                    <p class="card-text">Mobile: <%= address.mobile %></p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="selectedAddress" id="address<%= index %>" value="<%= address._id %>" <%= index === 0 ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="address<%= index %>">
+                                        Select
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#addAddressModal">Add New Address</button>
+        </div>
+
+        <div class="col-md-12 col-lg-7 col-xl-7">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Products</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <% cartItems.forEach(item => { %>
+                        <tr>
+                            <th scope="row">
+                                <div class="d-flex align-items-center">
+                                    <img src="/uploads/<%= item.productId.image[0] %>" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt="">
+                                </div>
+                            </th>
+                            <td>
+                                <p class="mb-0 mt-4"><%= item.productId.title %></p>
+                            </td>
+                            <td>
+                                <p class="mb-0 mt-4">₹ <%= item.productId.salesPrice %></p>
+                            </td>
+                            <td>
+                                <div class="input-group quantity mt-4" style="width: 100px;">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control form-control-sm text-center border-0" value="<%= item.quantity %>" readonly style="background-color: transparent;">
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="mb-0 mt-4">₹ <%= (item.productId.salesPrice * item.quantity).toFixed(2) %></p>
+
+                            </td>
+                        </tr>
+                        <% }) %>   
+                    </tbody>
+                </table>
+                
+                <div class="d-flex justify-content-end">
+                    <div class="col-sm-8 col-md-7 col-lg-6 col-xl-5">
+                        <div class="bg-light rounded">
+                            <div class="p-2">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h5 class="mb-0 me-2">Subtotal:</h5>
+                                    <p id="subtotal" class="mb-0">₹ <%= subtotal.toFixed(2) %></p>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h5 class="mb-0 me-2">Delivery charges:</h5>
+                                    <div>
+                                        <p class="mb-0"><%= deliveryCharges > 0 ? `₹${deliveryCharges}.00` : 'Free' %></p>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h5 class="mb-0 me-2">Discount:</h5>
+                                    <p id="discount" class="mb-0">₹ <%= discount.toFixed(2) %></p>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="mb-0 me-2">Grand Total:</h5>
+                                    <p id="gtotal" class="mb-0">₹ <%= grandTotal.toFixed(2) %></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+<!-- Payment -->
+<div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
+    <div class="col-12">
+        <div class="form-check text-start my-3">
+            <input type="radio" class="form-check-input bg-primary border-0" id="Delivery-1" name="paymentMethod" value="Wallet">
+            <label class="form-check-label" for="Delivery-1">Wallet</label>
+            <span id="warning" style="color: red;"></span>
+        </div>
+        <div class="form-check text-start my-3">
+            <input type="radio" class="form-check-input bg-primary border-0" id="Delivery-3" name="paymentMethod" value="Online Payment">
+            <label class="form-check-label" for="Delivery-3">Online Payment</label>
+        </div>
+        <div class="form-check text-start my-3">
+            <input type="radio" class="form-check-input bg-primary border-0" id="Delivery-2" name="paymentMethod" value="Cash On Delivery">
+            <label class="form-check-label" for="Delivery-2">Cash On Delivery</label>
+        </div>
+        <button id="placeOrderButton" onclick="orderNow()" class="btn btn-primary" style="width: 50%;">Place Order</button>
+    </div>
+    <!-- Popup HTML -->
+    <div id="popup" style="display:none; position:absolute; padding:20px; background-color:lightcoral; color:white; border-radius:5px; z-index:1000; width:300px;">
+        <div style="position:relative; width:100%; height:100%;">
+            <span id="popupMessage"></span>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+</div>
+
+    <!-- Warning message container -->
+    <div id="warning" style="color: red;"></div>
+
+   
+
+
+<%- include('../Layouts/footer.ejs') %>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    function orderNow() {
+        
+    event.preventDefault();
+
+    const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+    const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+    const couponCode = new URLSearchParams(window.location.search).get('couponCode');
+    const discountElement = document.getElementById('discount');
+    const warning = document.getElementById('warning');
+    const order = new URLSearchParams(window.location.search).get('order_id');
+
+    if (!selectedAddress) {
+            showPopup('Please select an address.');
+            return;
+        }
+
+    if (!selectedPaymentMethod) {
+            showPopup('Please select a payment method.');
+            return;
+    }
+
+    let discount = 0;
+    if (discountElement) {
+        const discountText = discountElement.innerText.replace(/[^\d.-]/g, ''); // Remove non-numeric characters
+        discount = parseFloat(discountText) || 0; // Parse to float, default to 0 if NaN
+    }
+
+    const orderDetails = {
+        addressId: selectedAddress.value,
+        paymentMethod: selectedPaymentMethod.value,
+        couponCode: couponCode || '',
+        discount: discount,
+        order_id: order || ''        
+    };
+        switch (orderDetails.paymentMethod) {
+            case 'Online Payment':
+                handleOnlinePayment(orderDetails);
+                break;
+            case 'Wallet':
+                handleWalletPayment(orderDetails);
+                break;
+            default:
+                handleCODPayment(orderDetails);
+                break;
+        }
+    }
+
+    function handleCODPayment(orderDetails) {
+        fetch('/placeorder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderDetails),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = `/order/success?orderId=${data.orderId}`;
+            } else {
+                showPopup(data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Fetch error: ", error);
+            warning.innerText = 'An error occurred. Please try again.';
+        });
+    }
+
+    //wallet
+
+    function handleWalletPayment(orderDetails) {
+    fetch('/placeorder/wallet', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderDetails),
+    })
+    .then(response => response.json())
+    .then(data => {
+        const warning = document.getElementById('warning'); // Assuming you have an element with id 'warning' to show messages
+        if (data.success) {
+            toastr.success('Order placed successfully!');
+            setTimeout(() => {
+                window.location.href = `/order/success?orderId=${data.orderId}`;
+            }, 4000);
+        } else {
+            if (data.message === 'Insufficient wallet balance') {
+                warning.innerText = `Insufficient wallet balance. Current balance: ${data.currentBalance}`;
+            } else {
+                warning.innerText = `Failed to place order: ${data.message}`;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error placing order:', error);
+        const warning = document.getElementById('warning'); // Make sure this matches your HTML
+        warning.innerText = 'Server error. Please try again later.';
+    });
+}
+    
+      //razorpay
+
+    function handleOnlinePayment(orderDetails) {
+        fetch('/razorpay/placeorder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderDetails),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var options = {
+                    key: data.key,
+                    amount: data.amount,
+                    currency: data.currency,
+                    name: "Eatables",
+                    description: "Test Transaction",
+                    image: "/img/logo.png",
+                    order_id: data.razorpayOrderId,
+                    handler: function (response) {
+                        fetch('/razorpay/verify', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                orderId: data.orderId,
+                            }),
+                        })
+                        .then(response => response.json())
+                        .then(verifyData => {
+                            if (verifyData.success) {
+                                window.location.href = `/order/success?orderId=${data.orderId}`;
+                            } else {
+                                warning.innerText = verifyData.message;
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Verification error: ", error);
+                            warning.innerText = 'Payment verification failed. Please try again.';
+                        });
+                    },
+                    prefill: {
+                        name: "Navyendhu Menon",
+                        email: "navyendhumenon@gmail.com",
+                        contact: "8921466823",
+                    },
+                    notes: {
+                        address: "Razorpay Corporate Office",
+                    },
+                    theme: {
+                        color: "#81C408",
+                    }
+                };
+                var rzp1 = new Razorpay(options);
+                rzp1.on('payment.failed', function (response) {
+                    console.error("Payment failed: ", response.error);
+                    warning.innerText = 'Payment failed. Please try again.';
+                    fetch('/razorpay/update-failed-order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            orderId: data.orderId,
+                            reason: response.error.description,
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(updateData => {
+                        if (!updateData.success) {
+                            warning.innerText = 'Failed to update order status. Please contact support.';
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Order update fetch error: ", error);
+                        warning.innerText = 'Failed to update order status. Please contact support.';
+                    });
+                });
+                rzp1.open();
+            } else {
+                warning.innerText = data.message;
+            }
+        })
+        .catch(error => {
+            console.error("Fetch error: ", error);
+            warning.innerText = 'An error occurred. Please try again.';
+        });
+    }
+
+
+
+      function showPopup(message) {
+        const popup = document.getElementById('popup');
+        const popupMessage = document.getElementById('popupMessage');
+        
+        popupMessage.innerText = message;
+        popup.style.display = 'block';
+
+        // Automatically close the popup after 2 seconds
+        setTimeout(() => {
+            popup.style.display = 'none';
+        }, 2000);
+    }
+    function closePopup() {
+        document.getElementById('popup').style.display = 'none';
+    }
+
+
+
+
+        //add address
+        document.getElementById('addAddressForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+    
+    const addressData = {
+        name: document.getElementById('addname').value,
+        mobile: document.getElementById('contact').value,
+        addressLine1: document.getElementById('addressLine1').value,
+        addressLine2: document.getElementById('addressLine2').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        postalCode: document.getElementById('postalCode').value
+    };
+
+      console.log("ADDRESS DATA", addressData)
+
+    try {
+        const response = await fetch('/addaddresses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(addressData)
+        });
+
+        if (response.ok) {
+            toastr.success('Address added successfully');
+            // Optionally, close the modal or reset the form
+            document.getElementById('addAddressForm').reset();
+            $('#addAddressModal').modal('hide');
+            // Reload the page after 2 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            const errorData = await response.json();
+            toastr.error(`Error: ${errorData.message}`);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while adding the address');
+    }
+});
+</script>

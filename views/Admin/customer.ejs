@@ -1,0 +1,210 @@
+
+    <%- include('../Layouts/adminHeader.ejs') %>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+      }
+    
+      .pagination {
+        display: flex;
+        justify-content: center;
+        list-style: none;
+        padding: 0;
+      }
+    
+      .pagination .page-item {
+        margin: 0 5px;
+      }
+    
+      .pagination .page-link {
+        color: #81c408; /* Link color */
+        text-decoration: none;
+        padding: 8px 12px; /* Add padding for better appearance */
+      }
+    
+      .pagination .page-item.active .page-link {
+        background-color: #d63384; /* Active page background color */
+        color: white; /* Active page text color */
+      }
+    </style>
+    
+
+    <div class="container-fluid py-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+              <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                <h6 class="text-white text-capitalize ps-3">Customer Details</h6>
+              </div>
+            </div>
+            <div class="card-body px-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0" id="myTable">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"> Customer Name</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Mobile Number</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Registration Date</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
+                      <th class="text-secondary opacity-7"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (locals.userDetails) { %>
+                      <% for(let i = 0; i < userDetails.length; i++) { %>
+                        <tr class="order-item">
+                          <td>
+                            <div class="d-flex px-2 py-1">
+                              <div class="d-flex flex-column justify-content-center">
+                                <h6 class="mb-0 text-sm"><%= userDetails[i].firstName + ' ' + userDetails[i].lastName %></h6>
+                                <p class="text-xs text-secondary mb-0"><%= userDetails[i].email %></p>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <p class="text-xs font-weight-bold mb-0"><%= userDetails[i].mobile %></p>
+                          </td>
+                          <% if (userDetails[i].isActive === false) { %>
+                            <td class="align-middle text-center text-sm">
+                              <span class="badge badge-sm bg-gradient-success">BLOCKED</span>
+                            </td>
+                          <% } else { %>
+                            <td class="align-middle text-center text-sm">
+                              <span class="badge badge-sm bg-gradient-secondary">ACTIVE</span>
+                            </td>
+                          <% } %>
+                          <td class="align-middle text-center">
+                            <span class="text-secondary text-xs font-weight-bold"><%= new Date(userDetails[i].createdAt).toLocaleString() %></span>
+                          </td>
+                          <% if (userDetails[i].isActive === true) { %>
+                            <td class="align-middle text-center">
+                              <button onclick="confirmSubmission('<%= userDetails[i]._id %>', true)" class="btn btn-sm btn-danger" data-toggle="tooltip" data-original-title="Block user">
+                                Block
+                              </button>
+                            </td>
+                          <% } else { %>
+                            <td class="align-middle text-center">
+                              <button onclick="confirmSubmission('<%= userDetails[i]._id %>', false)" class="btn btn-sm btn-success" data-toggle="tooltip" data-original-title="Unblock user">
+                                Unblock
+                              </button>
+                            </td>
+                          <% } %>
+                          
+                        </tr>
+                      <% } %>
+                    <% } %>
+                  </tbody>
+                  
+                </table>
+              </div>
+              <!-- Pagination Container -->
+              <div class="pagination-container">
+                <ul id="pagination" class="pagination"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Include your other JavaScript files here -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+      $(document).ready(function() {
+        var itemsPerPage = 7; // Number of items per page
+  
+        function showPage(pageNum) {
+          $('.order-item').hide(); // Hide all order items
+          var startIndex = (pageNum - 1) * itemsPerPage;
+          var endIndex = startIndex + itemsPerPage - 1;
+          $('.order-item').slice(startIndex, endIndex + 1).show(); // Show items for the current page
+  
+          // Update active state in pagination
+          $('#pagination').find('li.page-item').removeClass('active');
+          $('#pagination').find('li.page-item[data-page="' + pageNum + '"]').addClass('active');
+        }
+  
+        function generatePagination() {
+          var numPages = Math.ceil($('.order-item').length / itemsPerPage);
+          var paginationHTML = '';
+          for (var i = 1; i <= numPages; i++) {
+            paginationHTML += '<li class="page-item" data-page="' + i + '"><a class="page-link" href="#">' + i + '</a></li>';
+          }
+          $('#pagination').html(paginationHTML);
+          $('#pagination').find('li.page-item:first').addClass('active'); // Set first page as active initially
+        }
+  
+        showPage(1); // Show first page of items
+        generatePagination(); // Generate pagination links
+  
+        $('#pagination').on('click', 'li.page-item', function(e) {
+          e.preventDefault(); // Prevent default anchor behavior
+          var pageNum = $(this).data('page');
+          showPage(pageNum); // Show the selected page
+        });
+      });
+
+
+  
+      function confirmSubmission(userId, isActive) {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: `${isActive ? 'Are you sure to Block this User?' : 'Are you sure to Unblock this User?'}`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Confirm',
+    confirmButtonColor: "orange",
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const url = isActive ? `/admin/blockCustomer` : `/admin/unBlockCustomer`;
+
+      fetch(url, {
+        method: 'POST', // Ensure the method matches the server route
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Handle success
+        console.log('Success:', data.message);
+        Swal.fire({
+          title: 'Success',
+          text: data.message,
+          icon: 'success',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          window.location.reload(); // or handle it as needed
+        });
+      })
+      .catch(error => {
+        // Handle error
+        console.error('Error:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'An error occurred. Please try again later.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      });
+    }
+  });
+}
+
+
+
+    </script>  
+<%- include('../Layouts/adminFooter.ejs') %>

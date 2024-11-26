@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <link rel="stylesheet" href="/css/otp.css">
+    <style>
+body {
+    background-image: url('/img/bggreen(2).jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.verify-otp,
+.resend-otp {
+    width: 70%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #fff;
+    font-size: 16px; /* Default font size */
+}
+
+.verify-otp {
+    background-color: #4CAF50;
+}
+
+.resend-otp {
+    background-color: #f44336;
+}
+
+.resend-otp:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.timer-container {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.toast-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+.toast {
+    display: none;
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: opacity 0.5s, transform 0.5s;
+}
+
+.toast.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.toast.success {
+    background-color: #4CAF50;
+}
+
+.toast.error {
+    background-color: #F44336;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+
+    .left-section {
+        padding: 15px;
+    }
+
+    input[type="text"],
+    .verify-otp,
+    .resend-otp {
+        padding: 8px;
+    }
+
+    label {
+        margin-bottom: 3px;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .verify-otp,
+    .resend-otp {
+        font-size: 14px; /* Reduced font size for smaller screens */
+    }
+
+    .timer-container {
+        margin-top: 15px; /* Added margin for better spacing */
+    }
+}
+
+@media (max-width: 480px) {
+    .left-section {
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    input[type="text"],
+    .verify-otp,
+    .resend-otp {
+        padding: 6px;
+    }
+
+    label {
+        margin-bottom: 2px;
+    }
+
+    .form-group {
+        margin-bottom: 8px;
+    }
+
+    .verify-otp,
+    .resend-otp {
+        font-size: 12px; /* Further reduced font size for very small screens */
+    }
+
+    .timer-container {
+        font-size: 14px; /* Adjusted font size for better readability */
+    }
+}
+
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="left-section">
+            <form id="verifyForm">
+                <div class="form-group">
+                    <label for="otp">Enter OTP</label>
+                    <input type="text" id="otp" name="otp" placeholder="" required>
+                    <button type="submit" class="verify-otp">VERIFY </button>
+                    <button type="button" id="resendButton" class="resend-otp" disabled>RESEND</button>
+                </div>
+                <div class="timer-container" id="timerContainer">
+                    <p>Resend OTP in <span id="timer">35</span> seconds</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type} show`;
+            toast.textContent = message;
+
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+
+                setTimeout(() => {
+                    toastContainer.removeChild(toast);
+                }, 500); // Match the duration of the transition
+            }, 3000); // Show the toast for 3 seconds
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const resendButton = document.getElementById('resendButton');
+            const timerElement = document.getElementById('timer');
+            const timerContainer = document.getElementById('timerContainer');
+            const verifyForm = document.getElementById('verifyForm');
+
+            let timerValue = 35; // Updated timer value
+            let timerInterval;
+
+            const startTimer = () => {
+                resendButton.disabled = true;
+                timerElement.textContent = timerValue;
+
+                timerInterval = setInterval(() => {
+                    timerValue--;
+                    timerElement.textContent = timerValue;
+
+                    if (timerValue <= 0) {
+                        clearInterval(timerInterval);
+                        resendButton.disabled = false;
+                        timerContainer.style.display = 'none'; // Hide the entire timer container
+                    }
+                }, 1000);
+            };
+
+            startTimer(); // Start the timer when the page loads
+
+            resendButton.addEventListener('click', () => {
+                
+                fetch('/resendotp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({}) // You can add any additional data if needed
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            showToast('OTP resent successfully!', 'success');
+                            timerValue = 35; // Reset the timer to 35 seconds
+                            timerContainer.style.display = 'block'; // Show the timer container
+                            startTimer(); // Restart the timer
+                        } else {
+                            return response.json().then(data => {
+                                showToast(data.error || 'Error resending OTP.', 'error');
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error resending OTP:', error);
+                        showToast('Error resending OTP. Please try again.', 'error');
+                    });
+            });
+
+            verifyForm.addEventListener('submit', (event) => {
+                event.preventDefault(); // Prevent the form from submitting the traditional way
+
+                const otp = document.getElementById('otp').value.trim();
+
+                if (otp === '') {
+                    showToast('OTP cannot be empty.', 'error');
+                    return;
+                }
+
+                fetch('/verifyotp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ otp })
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json().then(data => {
+                                showToast(data.message, 'success');
+                                // Redirect to the URL provided in the response
+                                window.location.href = data.redirect;
+                            });
+                        } else {
+                            return response.json().then(data => {
+                                const errorMessage = data.error || 'Error verifying OTP. Please try again.';
+                                if (data.error === 'Token missing or expired') {
+                                    showToast('Token missing or expired !!! Please signIn again');
+
+                                } else {
+                                    showToast(errorMessage, 'error');
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error verifying OTP:', error);
+                        showToast('Error verifying OTP. Please try again.', 'error');
+                    });
+            });
+        });
+    </script>
+</body>
+
+</html>
