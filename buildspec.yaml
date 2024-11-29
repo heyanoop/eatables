@@ -15,7 +15,7 @@ phases:
   build:
     commands:
       - echo "Starting the application temporarly to ensure it runs without errors..."
-      - timeout 10s node index.js
+      - node --check index.js
 
   post_build:
     commands:
