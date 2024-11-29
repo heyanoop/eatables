@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo "Installing dependencies..."
+      - npm install
+
+  pre_build:
+    commands:
+      - echo "No pre-build steps are required as there are no tests or builds."
+
+  build:
+    commands:
+      - echo "Starting the application to ensure it runs without errors..."
+      - node index.js
+
+  post_build:
+    commands:
+      - echo "Build phase completed. You can add deployment steps here if needed."
+
+artifacts:
+  files:
+    - '**/*'  # Include all files; refine to match your deployment needs
+  discard-paths: no  # Maintain the directory structure
