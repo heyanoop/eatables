@@ -2,9 +2,9 @@ version: 0.0
 os: linux
 files:
   - source: / 
-    destination: /home/ec2-user/myapp 
+    destination: /home/ubuntu/myapp 
 hooks:
   AfterInstall:
-    - location: scripts/start_application.sh
+    - location: /startapp_script.sh
       timeout: 300
       runas: ec2-user
