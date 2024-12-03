@@ -2,9 +2,9 @@ version: 0.0
 os: linux
 files:
   - source: / 
-    destination: /home/ubuntu/myapp 
+    destination: /home/ubuntu/eatables 
 hooks:
   AfterInstall:
     - location: /startapp_script.sh
       timeout: 300
-      runas: ec2-user
+      runas: ubuntu

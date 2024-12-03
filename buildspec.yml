@@ -19,9 +19,9 @@ phases:
 
   post_build:
     commands:
-      - echo "Build phase completed. You can add deployment steps here if needed."
+      - echo "Build phase completed"
 
 artifacts:
   files:
-    - '**/*'  # Include all files; refine to match your deployment needs
-  discard-paths: no  # Maintain the directory structure
+    - '**/*' 
+  discard-paths: no
