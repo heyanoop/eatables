@@ -1,4 +1,4 @@
-cd /home/ec2-user/eatables
+cd /home/ubuntu/eatables
 
 pm2 stop index.js
 pm2 start index.js       
