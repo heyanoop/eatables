@@ -19,7 +19,8 @@ phases:
 
   post_build:
     commands:
-      - echo "Build phase completed"
+      - echo "Build phase completed thank you"
+      
 
 artifacts:
   files:
