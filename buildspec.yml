@@ -19,7 +19,7 @@ phases:
 
   post_build:
     commands:
-      - echo "Build phase completed thank you"
+      - echo "Build phase completed thank you!"
       
 
 artifacts:
