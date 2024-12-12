@@ -26,6 +26,5 @@ jobs:
           registry: docker.io
           platforms: linux/amd64
           tags: |
-            latest
-            v1.0.0
+            build-${{ github.run_number }}
           login: true
