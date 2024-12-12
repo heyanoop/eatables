@@ -1,0 +1,31 @@
+name: build docker image
+on:
+    push:
+        branches:
+            - master
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: $DOCKER_USERNAME
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker build and push
+        uses: cloudposse/github-action-docker-build-push@1.16.0
+        with:
+          file: Dockerfile
+          organization: $DOCKER_USERNAME
+          repository: eatables
+          registry: docker.io
+          platforms: linux/amd64
+          tags: |
+            latest
+            v1.0.0
+          login: true
