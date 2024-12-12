@@ -14,14 +14,14 @@ jobs:
       - name: Log in to DockerHub
         uses: docker/login-action@v2
         with:
-          username: $DOCKER_USERNAME
+          username: heyanoop
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Docker build and push
         uses: cloudposse/github-action-docker-build-push@1.16.0
         with:
           file: Dockerfile
-          organization: $DOCKER_USERNAME
+          organization: heyanoop
           repository: eatables
           registry: docker.io
           platforms: linux/amd64
