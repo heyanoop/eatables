@@ -22,10 +22,7 @@ jobs:
             docker build -t heyanoop/eatables:${{ github.run_number }} .
             docker push heyanoop/eatables:${{ github.run_number }} .
             - name: Verify pushed image
-            run: |
-                docker pull heyanoop/eatables:${{ github.run_number }}
-                docker images | grep "heyanoop/eatables"
-    
+                
       - name: Clean up local Docker resources
         run: |
             docker rmi heyanoop/eatables:${{ github.run_number }}
