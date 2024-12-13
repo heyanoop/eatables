@@ -1,9 +1,11 @@
 name: Deploy Docker Image to EC2
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows:
+      - build docker image
+    types:
+        - completed
 
 jobs:
   deploy:
@@ -15,13 +17,13 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H <EC2_IP_ADDRESS> >> ~/.ssh/known_hosts
+          ssh-keyscan -H  >> ~/.ssh/known_hosts
 
       - name: Pull and Deploy Docker Image
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@<EC2_IP_ADDRESS> << 'EOF'
-            docker pull <your-dockerhub-username>/<your-repo-name>:latest
-            docker stop <your-container-name> || true
-            docker rm <your-container-name> || true
-            docker run -d --name <your-container-name> -p 80:80 <your-dockerhub-username>/<your-repo-name>:latest
+          ssh -o StrictHostKeyChecking=no ubuntu@15.207.249.95 << 'EOF'
+            docker pull docker push heyanoop/eatables:9
+            docker stop eatables || true
+            docker rm eatables || true
+            docker run -d --name eatables -p 3000:5000 heyanoop/eatables:9
           EOF
