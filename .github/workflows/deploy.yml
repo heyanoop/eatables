@@ -22,8 +22,8 @@ jobs:
       - name: Pull and Deploy Docker Image
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@15.207.249.95 << 'EOF'
-            docker pull docker push heyanoop/eatables:9
+            docker pull docker push heyanoop/eatables:11
             docker stop eatables || true
             docker rm eatables || true
-            docker run -d --name eatables -p 3000:5000 heyanoop/eatables:9
+            docker run -d --name eatables --env-file .env -p 3000:5000 heyanoop/eatables:11
           EOF
