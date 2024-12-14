@@ -26,5 +26,5 @@ jobs:
             docker stop eatables || true
             docker rm eatables || true
             echo y | docker system prune -a
-            docker run -d --name eatables --env-file .env -p 3000:5000 heyanoop/eatables:11
+            docker run -d --name eatables --env-file .env -p 3000:5000 heyanoop/eatables:${{ github.run_number }}
           EOF
