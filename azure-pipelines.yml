@@ -23,6 +23,6 @@ stages:
         - task: Docker@2
           inputs:
             containerRegistry: 'docker-hub-registry'
-            repository: 'eatables'
+            repository: 'heyanoop/eatables'
             command: 'buildAndPush'
             Dockerfile: '**/Dockerfile'
