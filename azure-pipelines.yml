@@ -23,14 +23,14 @@ stages:
         pool:
           name: default
         steps:
-        - task: Docker@2
-          inputs:
-            containerRegistry: 'docker-hub-registry'
-            repository: 'heyanoop/eatables'
-            command: 'buildAndPush'
-            Dockerfile: '**/Dockerfile'
-        - script: docker builder prune -f
-          displayName: clear builder cache
+          - task: Docker@2
+            inputs:
+              containerRegistry: "docker-hub-registry"
+              repository: "heyanoop/eatables"
+              command: "buildAndPush"
+              Dockerfile: "**/Dockerfile"
+          - script: docker builder prune -f
+            displayName: clear builder cache
   - stage: Deploy
     dependsOn: Build
     displayName: deploy to ec2 instance
@@ -39,16 +39,18 @@ stages:
         displayName: deploy to ec2
         pool: default
         steps:
-         - script: |
-            mkdir -p ~/.ssh
-            echo "$(ssh_key)" > ~/.ssh/id_rsa
-            chmod 600 ~/.ssh/id_rsa
-            ssh-keyscan -H $(ec2_ip) >> ~/.ssh/known_hosts
+          - script: |
+              - script: |
+                  mkdir -p ~/.ssh
+                  # Write the key with proper newlines
+                  echo "$(ssh_key)" | base64 -d > ~/.ssh/id_rsa
+                  chmod 600 ~/.ssh/id_rsa
+                  ssh-keyscan -H $(ec2_ip) >> ~/.ssh/known_hosts
 
-            ssh -o StrictHostKeyChecking=no $(ec2_user)@$(ec2_ip) << EOF
-              docker stop eatables || true
-              docker rm eatables || true
-              echo y | docker system prune -a
-              docker run -d --name eatables --env-file .env -p 3000:5000 heyanoop/eatables:$(tag)
-            EOF
-            displayName: Deploy application
+                  ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $(ec2_user)@$(ec2_ip) << EOF
+                    docker stop eatables || true
+                    docker rm eatables || true
+                    echo y | docker system prune -a
+                    docker run -d --name eatables --env-file .env -p 3000:5000 heyanoop/eatables:$(tag)
+                  EOF
+                displayName: Deploy application
