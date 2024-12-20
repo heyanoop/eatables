@@ -10,6 +10,9 @@ resources:
 
 variables:
   tag: "$(Build.BuildId)"
+  ec2_ip: "13.203.159.242"
+  ec2_user: "ubuntu"
+  ssh_key: "$(ssh-key)"
 
 stages:
   - stage: Build
@@ -26,3 +29,26 @@ stages:
             repository: 'heyanoop/eatables'
             command: 'buildAndPush'
             Dockerfile: '**/Dockerfile'
+        - script: docker builder prune -f
+          displayName: clear builder cache
+  - stage: Deploy
+    dependsOn: Build
+    displayName: deploy to ec2 instance
+    jobs:
+      - job: Deploy
+        displayName: deploy to ec2
+        pool: default
+        steps:
+         - script: |
+            mkdir -p ~/.ssh
+            echo "$(ssh_key)" > ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+            ssh-keyscan -H $(ec2_ip) >> ~/.ssh/known_hosts
+
+            ssh -o StrictHostKeyChecking=no $(ec2_user)@$(ec2_ip) << EOF
+              docker stop eatables || true
+              docker rm eatables || true
+              echo y | docker system prune -a
+              docker run -d --name eatables --env-file .env -p 3000:5000 heyanoop/eatables:$(tag)
+            EOF
+            displayName: Deploy application
