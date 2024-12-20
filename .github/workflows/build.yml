@@ -2,7 +2,7 @@ name: build docker image
 on:
     push:
         branches:
-            - master
+            - main
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -27,5 +27,5 @@ jobs:
             docker rmi heyanoop/eatables:${{ github.run_number }}
             docker system prune -f    
       - name: Notify success
-        run: echo "Docker image heyanoop/eatables:${{ github.run_number }} successfully built and pushed."
+        run: echo "Docker image heyanoop/eatables:${{ github.run_number }} successfully built and pushed."    
 
