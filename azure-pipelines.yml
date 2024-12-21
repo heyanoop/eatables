@@ -12,7 +12,7 @@ variables:
   tag: "$(Build.BuildId)"
   ec2_ip: "13.203.159.242"
   ec2_user: "ubuntu"
-  ssh_key: "$(ssh-key)"
+  ssh_key: "$(SSH-KEY1)"
 
 stages:
   - stage: Build
